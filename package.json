@@ -1,0 +1,35 @@
+{
+  "name": "fund-agent",
+  "version": "0.0.1",
+  "description": "Initialize git config nostr.privkey with funds from a voucher",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "fund-agent": "./bin/fund-agent.js"
+  },
+  "scripts": {
+    "test": "node bin/fund-agent.js --help"
+  },
+  "keywords": [
+    "bitcoin",
+    "nostr",
+    "agent",
+    "wallet",
+    "taproot",
+    "testnet"
+  ],
+  "author": "Melvin Carvalho",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aam-skills/fund-agent"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@noble/secp256k1": "^2.3.0",
+    "btctx": "^0.1.0",
+    "sendtx": "^0.1.0"
+  }
+}
