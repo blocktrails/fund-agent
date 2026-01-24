@@ -22,7 +22,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/aam-skills/fund-agent"
+    "url": "https://github.com/blocktrails/fund-agent"
   },
   "engines": {
     "node": ">=18.0.0"
