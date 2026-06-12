@@ -1,6 +1,6 @@
 {
   "name": "fund-agent",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Initialize git config nostr.privkey with funds from a voucher",
   "type": "module",
   "main": "index.js",
