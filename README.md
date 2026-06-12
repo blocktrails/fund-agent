@@ -28,6 +28,9 @@ npx fund-agent /path/to/voucher.txt
 # Initialize from voucher URI
 npx fund-agent "txo:tbtc4:abc123:0?amount=5000000&key=deadbeef..."
 
+# Fund the existing key (no new key generated)
+npx fund-agent --existing
+
 # Generate key only (no funding)
 npx fund-agent --no-fund
 

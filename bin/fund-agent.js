@@ -27,7 +27,7 @@ const args = process.argv.slice(2);
 // Help
 if (args.includes('--help') || args.includes('-h')) {
   console.log(`
-fund-agent v0.0.1 - Initialize git config nostr.privkey with funds
+fund-agent v0.0.2 - Initialize git config nostr.privkey with funds
 
 Usage:
   npx fund-agent [options] [voucher]
@@ -41,7 +41,8 @@ Options:
   -h, --help     Show this help message
   -v, --version  Show version number
   --global       Store key in global git config (default: local)
-  --force        Overwrite existing key
+  --existing     Fund the existing key instead of generating a new one
+  --force        Discard the existing key and generate + fund a new one
   --dry-run      Show transaction plan without broadcasting
 
 Examples:
@@ -54,6 +55,9 @@ Examples:
   # Initialize from voucher URI
   npx fund-agent "txo:tbtc4:abc...def:0?amount=5000000&key=123...abc"
 
+  # Fund the existing key (no new key generated)
+  npx fund-agent --existing
+
   # Generate key only (no funding)
   npx fund-agent --no-fund
 `);
@@ -62,13 +66,14 @@ Examples:
 
 // Version
 if (args.includes('--version') || args.includes('-v')) {
-  console.log('0.0.1');
+  console.log('0.0.2');
   process.exit(0);
 }
 
 // Parse flags
 const useGlobal = args.includes('--global');
 const force = args.includes('--force');
+const useExisting = args.includes('--existing');
 const dryRun = args.includes('--dry-run');
 const noFund = args.includes('--no-fund');
 
@@ -200,7 +205,7 @@ if (noFund) {
 }
 
 async function main() {
-  console.log('=== fund-agent v0.0.1 ===\n');
+  console.log('=== fund-agent v0.0.2 ===\n');
 
   // Check if in git repo (unless using global)
   if (!useGlobal && !isGitRepo()) {
@@ -210,22 +215,41 @@ async function main() {
 
   // Check for existing key
   const existingKey = gitConfig('nostr.privkey') || gitConfig('nostr.privkey', null, true);
-  if (existingKey && !force) {
-    console.log('Existing key found. Use --force to overwrite.');
+
+  let privateKey, publicKey;
+
+  if (existingKey && useExisting) {
+    // Fund the existing key — no new key generated
+    privateKey = existingKey;
+    publicKey = getPubkey(privateKey);
+    console.log('Funding existing key.');
+    console.log(`Public key: ${publicKey}`);
+
+    if (!voucherArg) {
+      console.error('\nError: --existing needs a voucher to fund from.');
+      console.error('  npx fund-agent --existing ~/.gitmark/faucet.txt');
+      process.exit(1);
+    }
+  } else if (existingKey && !force) {
+    console.log('This repo already has a key (git config nostr.privkey).');
     console.log(`Public key: ${getPubkey(existingKey)}`);
+    console.log('');
+    console.log('To fund this key from a voucher:           re-run with --existing');
+    console.log('To replace it with a new funded key:       re-run with --force');
+    console.log('Warning: --force permanently discards the existing key.');
     process.exit(0);
+  } else {
+    // Generate new keypair
+    console.log('Generating new keypair...');
+    privateKey = generatePrivateKey();
+    publicKey = getPubkey(privateKey);
+    console.log(`Public key: ${publicKey}`);
+
+    // Save to git config
+    const scope = useGlobal ? 'global' : 'local';
+    gitConfig('nostr.privkey', privateKey, useGlobal);
+    console.log(`Private key saved to ${scope} git config (nostr.privkey)`);
   }
-
-  // Generate new keypair
-  console.log('Generating new keypair...');
-  const privateKey = generatePrivateKey();
-  const publicKey = getPubkey(privateKey);
-  console.log(`Public key: ${publicKey}`);
-
-  // Save to git config
-  const scope = useGlobal ? 'global' : 'local';
-  gitConfig('nostr.privkey', privateKey, useGlobal);
-  console.log(`Private key saved to ${scope} git config (nostr.privkey)`);
 
   // If voucher provided, fund the new wallet
   if (voucherArg) {
@@ -291,10 +315,20 @@ async function main() {
       fs.mkdirSync(txoDir, { recursive: true });
 
       const txoUri = `txo:${voucher.chain}:${broadcastTxid}:0?amount=${userAmount}&pubkey=${publicKey}`;
-      const txoData = [txoUri];
+
+      let txoData = [];
+      if (fs.existsSync(txoFile)) {
+        try {
+          const parsed = JSON.parse(fs.readFileSync(txoFile, 'utf8'));
+          if (Array.isArray(parsed)) txoData = parsed;
+        } catch {
+          // Unreadable file — start fresh rather than fail the funding
+        }
+      }
+      txoData.push(txoUri);
 
       fs.writeFileSync(txoFile, JSON.stringify(txoData, null, 2));
-      console.log(`\nTXO file created: ${txoFile}`);
+      console.log(`\nTXO file ${txoData.length > 1 ? 'updated' : 'created'}: ${txoFile}`);
 
       // Set network
       gitConfig('gitmark.network', voucher.chain, useGlobal);

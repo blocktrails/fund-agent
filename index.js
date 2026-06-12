@@ -160,27 +160,35 @@ export function saveVoucher(uri, filePath) {
  * @param {Object} options
  * @param {string} options.voucher - Voucher URI or file path
  * @param {boolean} options.global - Use global git config
- * @param {boolean} options.force - Overwrite existing key
+ * @param {boolean} options.existing - Fund the existing key instead of generating a new one
+ * @param {boolean} options.force - Discard the existing key and generate a new one
  * @returns {Promise<{privateKey: string, publicKey: string, txid: string, amount: number}>}
  */
 export async function fundAgent(options = {}) {
-  const { voucher, global: useGlobal = false, force = false } = options;
+  const { voucher, global: useGlobal = false, force = false, existing: fundExisting = false } = options;
 
   // Check for existing key
   const existingKey = gitConfig('nostr.privkey') || gitConfig('nostr.privkey', null, true);
-  if (existingKey && !force) {
+
+  let privateKey, publicKey;
+
+  if (existingKey && fundExisting) {
+    // Fund the existing key — no new key generated
+    privateKey = existingKey;
+    publicKey = getPubkey(existingKey);
+  } else if (existingKey && !force) {
     return {
       privateKey: existingKey,
       publicKey: getPubkey(existingKey),
       existing: true,
     };
+  } else {
+    // Generate new keypair
+    ({ privateKey, publicKey } = generateKeypair());
+
+    // Save to git config
+    gitConfig('nostr.privkey', privateKey, useGlobal);
   }
-
-  // Generate new keypair
-  const { privateKey, publicKey } = generateKeypair();
-
-  // Save to git config
-  gitConfig('nostr.privkey', privateKey, useGlobal);
 
   // If no voucher, return unfunded
   if (!voucher) {
@@ -232,8 +240,9 @@ export async function fundAgent(options = {}) {
   const sendtx = (await import('sendtx')).default;
   const txid = await sendtx(hex, parsed.chain);
 
-  // Create TXO file
+  // Create or update TXO file
   const txoDir = '.well-known/txo';
+  const txoFile = path.join(txoDir, 'txo.json');
   fs.mkdirSync(txoDir, { recursive: true });
 
   const txoUri = createTxo({
@@ -244,7 +253,18 @@ export async function fundAgent(options = {}) {
     amount: userAmount,
   });
 
-  fs.writeFileSync(path.join(txoDir, 'txo.json'), JSON.stringify([txoUri], null, 2));
+  let txoData = [];
+  if (fs.existsSync(txoFile)) {
+    try {
+      const current = JSON.parse(fs.readFileSync(txoFile, 'utf8'));
+      if (Array.isArray(current)) txoData = current;
+    } catch {
+      // Unreadable file — start fresh rather than fail the funding
+    }
+  }
+  txoData.push(txoUri);
+
+  fs.writeFileSync(txoFile, JSON.stringify(txoData, null, 2));
 
   // Update voucher file with change
   if (changeAmount > 0 && voucherFile) {
