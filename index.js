@@ -6,13 +6,15 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { getPublicKey } from '@noble/secp256k1';
 import crypto from 'crypto';
 
 export const INIT_AMOUNT = 1000000;
 export const MIN_FEE = 1000;
 export const DEFAULT_FAUCET = path.join(os.homedir(), '.gitmark', 'faucet.txt');
+// Networks accepted in a voucher's chain segment (see README "Networks").
+export const KNOWN_CHAINS = new Set(['tbtc4', 'btc', 'signet']);
 
 /**
  * Get x-only public key from private key
@@ -53,9 +55,12 @@ export function gitConfig(key, value = null, global = false) {
   const scope = global ? '--global' : '--local';
   try {
     if (value === null) {
-      return execSync(`git config ${scope} ${key}`, { encoding: 'utf8' }).trim();
+      return execFileSync('git', ['config', scope, key], { encoding: 'utf8' }).trim();
     } else {
-      execSync(`git config ${scope} ${key} "${value}"`);
+      // execFileSync passes args to git as argv, never through a shell, so
+      // a voucher-supplied value like `$(...)` cannot execute; `--` keeps a
+      // value beginning with `-` from being read as a git-config flag.
+      execFileSync('git', ['config', scope, '--', key, value]);
       return value;
     }
   } catch {
@@ -69,7 +74,7 @@ export function gitConfig(key, value = null, global = false) {
  */
 export function isGitRepo() {
   try {
-    execSync('git rev-parse --git-dir', { stdio: 'ignore' });
+    execFileSync('git', ['rev-parse', '--git-dir'], { stdio: 'ignore' });
     return true;
   } catch {
     return false;
@@ -94,6 +99,15 @@ export function parseVoucher(uri) {
   const [pathPart, query] = normalized.split('?');
   const [, chain, txid, voutStr] = pathPart.split(':');
   const vout = parseInt(voutStr, 10);
+
+  // Validate the parts that later reach git config / URLs (defense in
+  // depth): the chain is an allowlisted network name, the txid 64 hex.
+  if (!KNOWN_CHAINS.has(chain)) {
+    throw new Error(`Invalid voucher: unknown chain "${chain}"`);
+  }
+  if (!/^[0-9a-fA-F]{64}$/.test(txid)) {
+    throw new Error('Invalid voucher: txid must be 64 hex characters');
+  }
 
   const params = {};
   if (query) {
