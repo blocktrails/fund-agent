@@ -12,7 +12,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { getPublicKey } from '@noble/secp256k1';
 import crypto from 'crypto';
 
@@ -20,6 +20,8 @@ import crypto from 'crypto';
 const INIT_AMOUNT = 1000000;  // 1M sats (0.01 BTC)
 const MIN_FEE = 1000;
 const DEFAULT_FAUCET = path.join(os.homedir(), '.gitmark', 'faucet.txt');
+// Networks accepted in a voucher's chain segment (see README "Networks").
+const KNOWN_CHAINS = new Set(['tbtc4', 'btc', 'signet']);
 
 // CLI args
 const args = process.argv.slice(2);
@@ -88,14 +90,18 @@ function generatePrivateKey() {
   return crypto.randomBytes(32).toString('hex');
 }
 
-// Helper: get/set git config
+// Helper: get/set git config.
+// Uses execFileSync so key/value are passed to git as argv, never
+// through a shell — a voucher-supplied value like `$(...)` cannot
+// execute. `--` separates options from the value so a value beginning
+// with `-` is treated as data, not a git-config flag.
 function gitConfig(key, value = null, global = false) {
   const scope = global ? '--global' : '--local';
   try {
     if (value === null) {
-      return execSync(`git config ${scope} ${key}`, { encoding: 'utf8' }).trim();
+      return execFileSync('git', ['config', scope, key], { encoding: 'utf8' }).trim();
     } else {
-      execSync(`git config ${scope} ${key} "${value}"`);
+      execFileSync('git', ['config', scope, '--', key, value]);
       return value;
     }
   } catch {
@@ -106,7 +112,7 @@ function gitConfig(key, value = null, global = false) {
 // Helper: check if in git repo
 function isGitRepo() {
   try {
-    execSync('git rev-parse --git-dir', { stdio: 'ignore' });
+    execFileSync('git', ['rev-parse', '--git-dir'], { stdio: 'ignore' });
     return true;
   } catch {
     return false;
@@ -127,6 +133,17 @@ function parseVoucher(uri) {
   const [pathPart, query] = normalized.split('?');
   const [, chain, txid, voutStr] = pathPart.split(':');
   const vout = parseInt(voutStr, 10);
+
+  // Validate the parts that later reach git config / URLs. The chain is
+  // an allowlisted network name and the txid a hex string; rejecting
+  // anything else keeps voucher-supplied values from doing something
+  // surprising downstream.
+  if (!KNOWN_CHAINS.has(chain)) {
+    throw new Error(`Invalid voucher: unknown chain "${chain}"`);
+  }
+  if (!/^[0-9a-fA-F]{64}$/.test(txid)) {
+    throw new Error('Invalid voucher: txid must be 64 hex characters');
+  }
 
   const params = {};
   if (query) {
