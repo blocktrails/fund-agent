@@ -22,6 +22,12 @@ const MIN_FEE = 1000;
 const DEFAULT_FAUCET = path.join(os.homedir(), '.gitmark', 'faucet.txt');
 // Networks accepted in a voucher's chain segment (see README "Networks").
 const KNOWN_CHAINS = new Set(['tbtc4', 'btc', 'signet']);
+// mempool.space path prefix per chain, for explorer links after broadcast.
+const EXPLORER_BASE = {
+  btc: 'https://mempool.space',
+  tbtc4: 'https://mempool.space/testnet4',
+  signet: 'https://mempool.space/signet',
+};
 
 // CLI args
 const args = process.argv.slice(2);
@@ -323,7 +329,7 @@ async function main() {
       const sendtx = (await import('sendtx')).default;
       const broadcastTxid = await sendtx(hex, voucher.chain);
       console.log(`Transaction broadcast: ${broadcastTxid}`);
-      console.log(`Explorer: https://mempool.space/testnet4/tx/${broadcastTxid}`);
+      console.log(`Explorer: ${EXPLORER_BASE[voucher.chain]}/tx/${broadcastTxid}`);
 
       // Create TXO file
       const txoDir = '.well-known/txo';
