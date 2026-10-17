@@ -333,6 +333,22 @@ export function resolveKey({ global: useGlobal = false, existing = false, force 
 }
 
 /**
+ * Post a signed transaction to the chain's explorer endpoint (mempool API: raw hex in, txid out)
+ * @param {string} hex
+ * @param {string} chainId
+ * @param {{fetch?: typeof fetch}} [options]
+ * @returns {Promise<string>} txid
+ */
+export async function broadcast(hex, chainId, { fetch: f = globalThis.fetch } = {}) {
+  const chain = chainInfo(chainId);
+  const res = await f(chain.broadcast, { method: 'POST', headers: { 'content-type': 'text/plain' }, body: hex });
+  const body = (await res.text()).trim();
+  if (!res.ok) throw new Error(`Broadcast failed (${res.status} from ${chain.broadcast}): ${body}`);
+  if (!/^[0-9a-f]{64}$/.test(body)) throw new Error(`Broadcast failed: unexpected reply from ${chain.broadcast}: ${body.slice(0, 200)}`);
+  return body;
+}
+
+/**
  * Build and sign the funding transaction for a voucher, without broadcasting.
  * Output 0 pays the agent, output 1 (if any) is change back to the voucher key.
  * BIP341 chains sign through btctx; the BLAKE2b chains sign the unified
@@ -365,14 +381,13 @@ export async function buildFundingTx({ publicKey, voucher }) {
  * @param {Object} options.voucher - parsed voucher (see parseVoucher)
  * @param {string|null} [options.voucherFile] - file the voucher came from, updated with the change
  * @param {boolean} [options.global] - write gitmark.network to the global git config
- * @returns {Promise<{txid: string, explorer: string, amount: number, txoFile: string, txoCount: number, newVoucher: string|null}>}
+ * @returns {Promise<{txid: string, explorer: string, amount: number, txoFile: string, txoCount: number, newVoucher: string|null, address: string}>}
  */
-export async function fund({ publicKey, voucher, voucherFile = null, global: useGlobal = false }) {
+export async function fund({ publicKey, voucher, voucherFile = null, global: useGlobal = false, fetch: f = globalThis.fetch }) {
   const { hex, userAmount, changeAmount } = await buildFundingTx({ publicKey, voucher });
   const chain = chainInfo(voucher.chain);
 
-  const sendtx = (await import('sendtx')).default;
-  const txid = await sendtx(hex, voucher.chain, { endpoint: chain.broadcast });
+  const txid = await broadcast(hex, voucher.chain, { fetch: f });
 
   const txoDir = '.well-known/txo';
   const txoFile = path.join(txoDir, 'txo.json');
@@ -391,13 +406,15 @@ export async function fund({ publicKey, voucher, voucherFile = null, global: use
 
   gitConfig('gitmark.network', voucher.chain, useGlobal);
 
+  // Change becomes the next voucher. With no change the key stays in the file
+  // in its waiting form, so the same address can be topped up and found again.
   let newVoucher = null;
   if (changeAmount > 0) {
     newVoucher = createVoucher({ chain: voucher.chain, txid, vout: 1, privateKey: voucher.privateKey, amount: changeAmount });
-    if (voucherFile) saveVoucher(newVoucher, voucherFile);
   }
+  if (voucherFile) saveVoucher(newVoucher || createFaucet({ chain: voucher.chain, privateKey: voucher.privateKey }).uri, voucherFile);
 
-  return { txid, explorer: explorerUrl(voucher.chain, txid), amount: userAmount, txoFile, txoCount: txoData.length, newVoucher };
+  return { txid, explorer: explorerUrl(voucher.chain, txid), amount: userAmount, txoFile, txoCount: txoData.length, newVoucher, address: addressOf(voucher.chain, getPubkey(voucher.privateKey)) };
 }
 
 /**

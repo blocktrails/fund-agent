@@ -143,3 +143,41 @@ test('init stores a voucher from a string or from a file path, never the path it
   assert.match(run('status', '--dry-run'), /Balance: 7,000 sats/);
   fs.rmSync(dir, { recursive: true });
 });
+
+test('broadcast posts the hex to the chain endpoint and returns the txid, or the node error', async () => {
+  const { broadcast } = await import('../index.js');
+  const calls = [];
+  const ok = async (url, init) => { calls.push([url, init.method, init.body]); return { ok: true, status: 200, text: async () => `${txid}\n` }; };
+  assert.equal(await broadcast('0200deadbeef', 'txbt4', { fetch: ok }), txid);
+  assert.deepEqual(calls[0], ['https://mempool.guide/testnet4/api/tx', 'POST', '0200deadbeef']);
+  await assert.rejects(broadcast('00', 'btc', { fetch: async () => ({ ok: false, status: 400, text: async () => 'sendrawtransaction RPC error: bad-txns-inputs-missingorspent' }) }), /400 from https:\/\/mempool.space\/api\/tx.*missingorspent/);
+  await assert.rejects(broadcast('00', 'tbtc4', { fetch: async () => ({ ok: true, status: 200, text: async () => '<html>' }) }), /unexpected reply/);
+});
+
+test('fund: change becomes the next voucher; with no change the key waits in the file at the same address', async () => {
+  const { fund, createFaucet, loadVoucher } = await import('../index.js');
+  const fs = await import('node:fs');
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fund-agent-'));
+  const cwd = process.cwd();
+  process.chdir(dir);
+  try {
+    const file = path.join(dir, 'faucet.txt');
+    const sent = [];
+    const fetch = async (url, init) => { sent.push(init.body); return { ok: true, status: 200, text: async () => 'ab'.repeat(32) }; };
+    const agent = '22'.repeat(32);
+    const big = await fund({ publicKey: agent, voucher: { chain: 'txbt4', txid, vout: 0, privateKey: key, amount: 5000000 }, voucherFile: file, fetch });
+    assert.equal(big.newVoucher, `txo:txbt4:${'ab'.repeat(32)}:1?amount=3999000&key=${key}`);
+    assert.equal(loadVoucher(file), big.newVoucher);
+    const small = await fund({ publicKey: agent, voucher: { chain: 'txbt4', txid, vout: 0, privateKey: key, amount: 10000 }, voucherFile: file, fetch });
+    assert.equal(small.newVoucher, null);
+    assert.equal(loadVoucher(file), `txo:txbt4?key=${key}`);
+    assert.equal(small.address, createFaucet({ chain: 'txbt4', privateKey: key }).address);
+    assert.equal(sent.length, 2);
+    assert.equal(JSON.parse(fs.readFileSync('.well-known/txo/txo.json', 'utf8')).length, 2);
+  } finally {
+    process.chdir(cwd);
+    fs.rmSync(dir, { recursive: true });
+  }
+});

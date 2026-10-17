@@ -200,7 +200,6 @@ chain is signed with the unified opt-in sighash from Knots (`lib/unified.js`, ch
 - [gitmark](https://github.com/solidpayorg/gitmark-test) - Anchor git commits to Bitcoin
 - [blocktrails](https://blocktrails.org) - State anchoring protocol
 - [btctx](https://npmjs.com/package/btctx) - Transaction building
-- [sendtx](https://npmjs.com/package/sendtx) - Transaction broadcasting
 
 ## License
 

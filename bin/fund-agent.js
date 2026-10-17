@@ -225,7 +225,7 @@ async function main() {
         console.log(r.newVoucher);
       }
     } else if (v.file) {
-      console.log('\nWarning: Voucher exhausted (no change).');
+      console.log(`\nVoucher exhausted. Its key stays in ${v.file}; send more coins to ${r.address} to fund the next agent.`);
     }
 
     console.log('\n=== Agent funded successfully! ===');
