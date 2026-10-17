@@ -28,6 +28,8 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "@noble/curves": "^1.4.0",
+    "@noble/hashes": "^1.4.0",
     "@noble/secp256k1": "^2.3.0",
     "btctx": "^0.1.0",
     "sendtx": "^0.1.0"

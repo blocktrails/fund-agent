@@ -38,7 +38,7 @@ Options:
   --dry-run      Show transaction plan without broadcasting
 
 Chains:
-${Object.entries(CHAINS).map(([id, c]) => `  ${id.padEnd(8)} ${c.name}${c.sighash === 'unified' ? ' (recognised; signing not yet in this version)' : ''}`).join('\n')}
+${Object.entries(CHAINS).map(([id, c]) => `  ${id.padEnd(8)} ${c.name}${c.sighash === 'unified' ? ' (unified sighash)' : ''}`).join('\n')}
 
 Examples:
   # Initialize from default faucet
