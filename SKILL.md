@@ -1,169 +1,119 @@
 ---
 name: fund-agent
-description: Initialize git config nostr.privkey with funds from a voucher.
+description: Give this repo's agent key its first coins from the voucher file, one line, after npm init agent.
 version: 1.0.0
 author: melvincarvalho
-uses: [txo, faucet, pay]
+uses: [txo, faucet]
 ---
 
 # Fund Agent
 
-Initialize or fund the agent's wallet by setting up `git config nostr.privkey` and transferring funds from a TXO voucher.
+`npx fund-agent` pays 10,000 sats to the agent key in this repo's git config (`nostr.privkey`) from the
+voucher in `~/.gitmark/faucet.txt`, records the coin in `.well-known/txo/txo.json`, and writes the change
+back to the voucher file so the next repo is the same one line.
 
 ## When to Use
 
-Invoke with `/fund-agent` when you need to:
-- Initialize a new agent with a funded wallet
-- Fund an existing agent from a voucher
-- Set up nostr.privkey in git config with testnet4 funds
+- Right after `npm init agent`, to give the new key coins.
+- Any time a repo's agent key has no coin in `.well-known/txo/txo.json`.
+- To set up or inspect the voucher file: `init`, `status`.
 
-## Prerequisites
-
-Ensure these npm packages are available:
-- `btctx` - Transaction building
-- `sendtx` - Transaction broadcasting
-- `noskey` - Key generation/display
-
-## Instructions
-
-### 1. Check for Existing Key
+## The one line
 
 ```bash
-# Check if key already exists
-git config nostr.privkey
+npx fund-agent
 ```
 
-If a key exists, display it with:
-```bash
-npx noskey -p $(git config nostr.privkey)
-```
+What it does, in order:
 
-### 2. Generate New Key (if needed)
+1. Reads the voucher file (`~/.gitmark/faucet.txt`, or `FUND_AGENT_FAUCET`). If the file holds a key that is
+   still waiting for coins, it asks the chain's explorer for UTXOs at that key's address and fills in the outpoint.
+2. Uses the key already in `git config nostr.privkey`, or makes one if there is none. `--force` replaces it.
+3. Signs one transaction: 10,000 sats to the agent, 1,000 sats fee, the rest back to the voucher key.
+   Core chains sign BIP341; the BLAKE2b chains (`txbt4`, `xbt`) sign the unified sighash, so the spend cannot replay.
+4. Posts it to the chain's explorer endpoint, appends the coin to `.well-known/txo/txo.json`, sets
+   `git config gitmark.network`, and rewrites the voucher file with the change.
 
-```bash
-# Generate and save new keypair
-npm init agent@latest
-```
+Stops before writing anything if the voucher file is missing, empty, or has no coins yet; in that case it prints
+the address to send coins to.
 
-Or manually:
-```bash
-# Generate keypair
-npx noskey > /tmp/keys.txt
-# Extract and save privkey
-PRIVKEY=$(grep privkey /tmp/keys.txt | awk '{print $2}')
-git config --global nostr.privkey "$PRIVKEY"
-```
-
-### 3. Fund from Voucher
-
-If a voucher URI is provided, use it to fund the wallet:
-
-**Voucher format:** `txo:<chain>:<txid>:<vout>?amount=<sats>&key=<privkey>`
+## Setting up the voucher file, once
 
 ```bash
-# Parse voucher and build funding transaction
-# See /txo skill for parsing
-# See /pay skill for transaction building
+npx fund-agent init              # new key in ~/.gitmark/faucet.txt, prints an address; send coins there
+npx fund-agent init --chain xbt  # same, for another chain (default txbt4)
+npx fund-agent init "txo:…"      # store a voucher string someone gave you
+npx fund-agent status            # chain, address, balance, how many agents it still funds
 ```
 
-### 4. Create TXO File
-
-After funding, create `.well-known/txo/txo.json`:
-
-```bash
-mkdir -p .well-known/txo
-```
-
-Write the TXO URI to the file:
-```json
-["txo:tbtc4:<txid>:0?amount=<sats>&pubkey=<pubkey>"]
-```
+On this machine the txbt4 faucet (`/faucet` skill) can pay the printed address: `faucet pay <address> 0.01`.
 
 ## Arguments
 
 | Argument | Description |
 |----------|-------------|
-| `[voucher]` | TXO voucher URI or path to voucher file |
-| `--global` | Store key in global git config |
-| `--force` | Overwrite existing key |
+| `[voucher]` | A `txo:` voucher URI or a path to a file holding one, instead of the default file |
+| `init [voucher]` | Set up the voucher file (see above) |
+| `status` | Show what the voucher file holds |
+| `--chain <id>` | Chain for a new voucher key (`init` only) |
+| `--global` | Store the agent key in global git config |
+| `--force` | Replace the existing agent key with a new one (the old key is lost) |
+| `--no-fund` | Make the key only, do not look for a voucher |
+| `--dry-run` | Print the plan, do not broadcast |
 
-## Examples
+Chains: `btc`, `tbtc3`, `tbtc4`, `signet` (mempool.space), `txbt4`, `xbt` (mempool.guide, unified sighash).
 
-**Input:** `/fund-agent`
+## Voucher forms
 
-Generates a new keypair and saves to git config. No funding.
-
-**Input:** `/fund-agent txo:tbtc4:abc...def:0?amount=5000000&key=123...abc`
-
-Generates keypair, funds from voucher, creates TXO file.
-
-**Input:** `/fund-agent ~/.gitmark/faucet.txt`
-
-Reads voucher from file, funds wallet, updates file with change.
-
-## Workflow
-
-1. Use the `nostr.privkey` already in git config (from `npm init agent`), or make one
-2. If none (or `--force`), generate new keypair
-3. Save private key to git config
-4. If voucher provided:
-   - Parse voucher (see `/txo`)
-   - Build transaction: voucher -> user wallet + change
-   - Broadcast transaction
-   - Create `.well-known/txo/txo.json`
-   - Update voucher file with change (if file source)
-5. Display public key and funding status
-
-## Default Faucet
-
-If no voucher is provided, check for default faucet at:
 ```
-~/.gitmark/faucet.txt
+txo:<chain>:<txid>:<vout>?amount=<sats>&key=<privkey>   a coin and the key that spends it
+txo:<chain>?key=<privkey>                               a key waiting for coins at its address
 ```
 
-## Transaction Details
-
-- **INIT_AMOUNT:** 10,000 sats to the agent
-- **MIN_FEE:** 1,000 sats
-- **Change:** Returns to voucher address
+`urn:voucher:` may prefix either. Whoever holds the string holds the coins: never print it, never commit it.
 
 ## Output
 
 ```
-=== fund-agent ===
+=== fund-agent v0.0.5 ===
 
-Generating new keypair...
-Public key: <64-char hex pubkey>
-Private key saved to global git config (nostr.privkey)
+Using default faucet: /home/you/.gitmark/faucet.txt
+Funding the key in git config (nostr.privkey).
+Public key: <64-char hex>
 
 Processing voucher...
-Chain: tbtc4
-Voucher amount: 5000000 sats
+Chain: txbt4 (Bitcoin BLAKE2b testnet4)
+Voucher amount: 1,000,000 sats
 
 Transaction plan:
-  Input:  5000000 sats (from voucher)
-  Output: 10000 sats (to you)
-  Change: 3999000 sats (back to voucher)
-  Fee:    1000 sats
+  Input:  1,000,000 sats (from voucher)
+  Output: 10,000 sats (to you)
+  Change: 989,000 sats (back to voucher)
+  Fee:    1,000 sats
 
-Building transaction...
-Broadcasting transaction...
+Building and broadcasting transaction...
 Transaction broadcast: <txid>
+Explorer: https://mempool.guide/testnet4/tx/<txid>
 
 TXO file created: .well-known/txo/txo.json
+Voucher file updated: /home/you/.gitmark/faucet.txt
 
-=== Initialization complete! ===
+=== Agent funded successfully! ===
 ```
+
+## Library
+
+`import { fundAgent, buildFundingTx, broadcast, createFaucet, refreshVoucher, CHAINS } from 'fund-agent'`.
+`buildFundingTx` returns the signed hex without sending it. See README.md.
 
 ## Security Notes
 
-- Private keys are stored in git config (not in files)
-- Never commit private keys to repositories
-- Voucher private keys are temporary and should be rotated
+- The agent key lives in git config, never in a tracked file.
+- The voucher file is mode 600 and holds a private key; keep it out of repos and logs.
+- One voucher, one spend at a time: two funding runs at once would race on the same coin.
 
 ## References
 
-- [gitmark-test](https://github.com/solidpayorg/gitmark-test)
-- [btctx](https://www.npmjs.com/package/btctx)
-- [sendtx](https://www.npmjs.com/package/sendtx)
-- [noskey](https://www.npmjs.com/package/noskey)
+- [fund-agent](https://github.com/blocktrails/fund-agent)
+- [bitcoin-kernel utxo page](https://bitcoin-kernel.com/utxo/), which opens any `txo:` coin
+- [create-agent](https://init-agent.com/SKILL.md), which makes the key this tool funds
