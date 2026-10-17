@@ -8,7 +8,7 @@
     "fund-agent": "./bin/fund-agent.js"
   },
   "scripts": {
-    "test": "node bin/fund-agent.js --help"
+    "test": "node --test && node bin/fund-agent.js --help > /dev/null"
   },
   "keywords": [
     "bitcoin",
