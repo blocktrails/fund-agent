@@ -112,7 +112,7 @@ test('refreshVoucher fills in the largest confirmed UTXO and rewrites the file',
   assert.equal(loadVoucher(file), `txo:txbt4:${'cc'.repeat(32)}:1?amount=30000&key=${key}`);
   const empty = await refreshVoucher({ uri: f.uri, file: null }, { fetch: async () => ({ ok: true, json: async () => [] }) });
   assert.equal(empty.voucher.funded, false);
-  assert.deepEqual(agentsFrom(30000), { full: 0, partial: true });
+  assert.deepEqual(agentsFrom(30000), { full: Math.floor(30000 / (INIT_AMOUNT + MIN_FEE)), partial: true });
   assert.deepEqual(agentsFrom(2 * (INIT_AMOUNT + MIN_FEE) + 500), { full: 2, partial: false });
   fs.rmSync(dir, { recursive: true });
 });
@@ -168,7 +168,7 @@ test('fund: change becomes the next voucher; with no change the key waits in the
     const fetch = async (url, init) => { sent.push(init.body); return { ok: true, status: 200, text: async () => 'ab'.repeat(32) }; };
     const agent = '22'.repeat(32);
     const big = await fund({ publicKey: agent, voucher: { chain: 'txbt4', txid, vout: 0, privateKey: key, amount: 5000000 }, voucherFile: file, fetch });
-    assert.equal(big.newVoucher, `txo:txbt4:${'ab'.repeat(32)}:1?amount=3999000&key=${key}`);
+    assert.equal(big.newVoucher, `txo:txbt4:${'ab'.repeat(32)}:1?amount=${5000000 - INIT_AMOUNT - MIN_FEE}&key=${key}`);
     assert.equal(loadVoucher(file), big.newVoucher);
     const small = await fund({ publicKey: agent, voucher: { chain: 'txbt4', txid, vout: 0, privateKey: key, amount: 10000 }, voucherFile: file, fetch });
     assert.equal(small.newVoucher, null);

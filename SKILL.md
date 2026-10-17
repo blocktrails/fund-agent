@@ -123,7 +123,7 @@ If no voucher is provided, check for default faucet at:
 
 ## Transaction Details
 
-- **INIT_AMOUNT:** 1,000,000 sats (0.01 BTC) to user
+- **INIT_AMOUNT:** 10,000 sats to the agent
 - **MIN_FEE:** 1,000 sats
 - **Change:** Returns to voucher address
 
@@ -142,7 +142,7 @@ Voucher amount: 5000000 sats
 
 Transaction plan:
   Input:  5000000 sats (from voucher)
-  Output: 1000000 sats (to you)
+  Output: 10000 sats (to you)
   Change: 3999000 sats (back to voucher)
   Fee:    1000 sats
 

@@ -31,7 +31,7 @@ npx fund-agent
 ```
 
 The first run after the coins arrive finds them through the chain's explorer and fills in the
-outpoint; every run pays 1,000,000 sats to a fresh agent key and writes the change back to the file.
+outpoint; every run pays 10,000 sats to a fresh agent key and writes the change back to the file.
 `npx fund-agent status` shows the address, the balance and how many agents it still funds.
 
 If someone hands you a voucher string instead, store it with `npx fund-agent init "txo:…"`.

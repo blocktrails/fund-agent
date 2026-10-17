@@ -13,7 +13,7 @@ import crypto from 'crypto';
 import { taprootAddress } from './lib/address.js';
 
 export const VERSION = createRequire(import.meta.url)('./package.json').version;
-export const INIT_AMOUNT = 1000000;
+export const INIT_AMOUNT = 10000;
 export const MIN_FEE = 1000;
 export const DEFAULT_FAUCET = process.env.FUND_AGENT_FAUCET || path.join(os.homedir(), '.gitmark', 'faucet.txt');
 
