@@ -123,3 +123,23 @@ test('every chain has an hrp and an api base the broadcast endpoint hangs off', 
     assert.equal(c.broadcast, `${c.api}/tx`, id);
   }
 });
+
+test('init stores a voucher from a string or from a file path, never the path itself', async () => {
+  const { execFileSync } = await import('node:child_process');
+  const fs = await import('node:fs');
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fund-agent-'));
+  const faucet = path.join(dir, 'faucet.txt');
+  const bin = new URL('../bin/fund-agent.js', import.meta.url).pathname;
+  const run = (...a) => execFileSync(process.execPath, [bin, ...a], { encoding: 'utf8', env: { ...process.env, FUND_AGENT_FAUCET: faucet } });
+  const uri = `txo:txbt4:${txid}:1?amount=5000&key=${key}`;
+  run('init', `urn:voucher:${uri}`);
+  assert.equal(fs.readFileSync(faucet, 'utf8').trim(), uri);
+  const src = path.join(dir, 'given.txt');
+  fs.writeFileSync(src, `txo:tbtc4:${txid}:0?amount=7000&key=${key}\n`);
+  run('init', '--force', src);
+  assert.equal(fs.readFileSync(faucet, 'utf8').trim(), `txo:tbtc4:${txid}:0?amount=7000&key=${key}`);
+  assert.match(run('status', '--dry-run'), /Balance: 7,000 sats/);
+  fs.rmSync(dir, { recursive: true });
+});

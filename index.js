@@ -234,7 +234,7 @@ export function parseFaucet(uri) {
   if (waiting) return createFaucet({ chain: waiting[1], privateKey: waiting[2] });
   const v = parseVoucher(u);
   const publicKey = getPubkey(v.privateKey);
-  return { ...v, publicKey, address: addressOf(v.chain, publicKey), funded: true };
+  return { ...v, uri: createVoucher(v), publicKey, address: addressOf(v.chain, publicKey), funded: true };
 }
 
 /**

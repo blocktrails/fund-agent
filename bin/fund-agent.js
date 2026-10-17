@@ -107,8 +107,12 @@ async function init() {
   fs.mkdirSync(path.dirname(DEFAULT_FAUCET), { recursive: true });
   let voucher;
   if (voucherArg) {
-    voucher = parseFaucet(voucherArg.startsWith('txo:') || voucherArg.startsWith('urn:voucher:') ? voucherArg : fs.readFileSync(voucherArg, 'utf8'));
-    saveVoucher(voucher.funded ? voucherArg.trim() : voucher.uri, DEFAULT_FAUCET);
+    const isUri = voucherArg.startsWith('txo:') || voucherArg.startsWith('urn:voucher:');
+    if (!isUri && !fs.existsSync(voucherArg)) die(`Invalid voucher: must be a txo: URI or a path to a file (${voucherArg})`);
+    const raw = (isUri ? voucherArg : fs.readFileSync(voucherArg, 'utf8')).trim();
+    voucher = parseFaucet(raw);
+    saveVoucher(voucher.uri, DEFAULT_FAUCET);
+    fs.chmodSync(DEFAULT_FAUCET, 0o600);
     console.log(`Voucher stored in ${DEFAULT_FAUCET}`);
     describe(voucher);
     return;
