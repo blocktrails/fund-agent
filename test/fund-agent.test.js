@@ -181,3 +181,30 @@ test('fund: change becomes the next voucher; with no change the key waits in the
     fs.rmSync(dir, { recursive: true });
   }
 });
+
+test('resolveKey funds the key already in git config; --force replaces it', async () => {
+  const { resolveKey, getPubkey } = await import('../index.js');
+  const { execFileSync } = await import('node:child_process');
+  const fs = await import('node:fs');
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fund-agent-'));
+  const cwd = process.cwd();
+  process.chdir(dir);
+  try {
+    execFileSync('git', ['init', '-q']);
+    execFileSync('git', ['config', '--local', 'nostr.privkey', key]);
+    const same = resolveKey();
+    assert.equal(same.created, false);
+    assert.equal(same.publicKey, getPubkey(key));
+    const legacy = resolveKey({ existing: true });
+    assert.equal(legacy.publicKey, getPubkey(key));
+    const fresh = resolveKey({ force: true });
+    assert.equal(fresh.created, true);
+    assert.notEqual(fresh.publicKey, getPubkey(key));
+    assert.equal(execFileSync('git', ['config', '--local', 'nostr.privkey'], { encoding: 'utf8' }).trim(), fresh.privateKey);
+  } finally {
+    process.chdir(cwd);
+    fs.rmSync(dir, { recursive: true });
+  }
+});

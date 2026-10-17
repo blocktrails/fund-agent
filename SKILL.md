@@ -103,7 +103,7 @@ Reads voucher from file, funds wallet, updates file with change.
 
 ## Workflow
 
-1. Check for existing `nostr.privkey` in git config
+1. Use the `nostr.privkey` already in git config (from `npm init agent`), or make one
 2. If none (or `--force`), generate new keypair
 3. Save private key to git config
 4. If voucher provided:

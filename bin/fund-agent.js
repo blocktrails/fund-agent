@@ -49,7 +49,6 @@ Options:
   -v, --version  Show version number
   --chain <id>   Chain for a new voucher key (init only)
   --global       Store key in global git config (default: local)
-  --existing     Fund the existing key instead of generating a new one
   --force        Discard the existing key and generate + fund a new one
   --no-fund      Generate the key only, do not look for a voucher
   --dry-run      Show transaction plan without broadcasting
@@ -68,7 +67,6 @@ if (args.includes('--version') || args.includes('-v')) {
 const flag = (name) => { const i = args.indexOf(name); return i >= 0 && args[i + 1] && !args[i + 1].startsWith('-') ? args[i + 1] : null; };
 const useGlobal = args.includes('--global');
 const force = args.includes('--force');
-const existing = args.includes('--existing');
 const dryRun = args.includes('--dry-run');
 const noFund = args.includes('--no-fund');
 const chainFlag = flag('--chain');
@@ -148,7 +146,7 @@ async function main() {
   let voucher = null;
   if (!noFund) {
     v = resolveVoucher(voucherArg);
-    if (!v && !voucherArg && !existing) {
+    if (!v && !voucherArg) {
       // Nothing to fund from yet: make the key and say where to send coins
       await init();
       console.log('\nNo agent key was made. Run again once the coins have arrived.');
@@ -166,26 +164,15 @@ async function main() {
     }
   }
 
-  const key = resolveKey({ global: useGlobal, existing, force });
-
-  if (key.kept) {
-    console.log('This repo already has a key (git config nostr.privkey).');
-    console.log(`Public key: ${key.publicKey}`);
-    console.log('');
-    console.log('To fund this key from a voucher:           re-run with --existing');
-    console.log('To replace it with a new funded key:       re-run with --force');
-    console.log('Warning: --force permanently discards the existing key.');
-    return;
-  }
+  const key = resolveKey({ global: useGlobal, force });
 
   if (key.created) {
     console.log('Generating new keypair...');
     console.log(`Public key: ${key.publicKey}`);
     console.log(`Private key saved to ${useGlobal ? 'global' : 'local'} git config (nostr.privkey)`);
   } else {
-    console.log('Funding existing key.');
+    console.log('Funding the key in git config (nostr.privkey).');
     console.log(`Public key: ${key.publicKey}`);
-    if (!v) die(`--existing needs a voucher to fund from.\n  npx fund-agent --existing ${DEFAULT_FAUCET}`);
   }
 
   if (!v) {

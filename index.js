@@ -318,15 +318,14 @@ export function planFunding(voucher) {
 }
 
 /**
- * Find the key to fund: the existing one, a fresh one, or a refusal to touch what is there
- * @param {{global?: boolean, existing?: boolean, force?: boolean}} options
- * @returns {{privateKey: string, publicKey: string, created: boolean, kept: boolean}}
- *   kept=true means a key exists and neither --existing nor --force was given, so nothing was done
+ * The key to fund: the one in git config if there is one (made by create-agent or
+ * an earlier run), otherwise a fresh one written there. --force replaces an existing key.
+ * @param {{global?: boolean, force?: boolean, existing?: boolean}} options - existing is accepted and ignored
+ * @returns {{privateKey: string, publicKey: string, created: boolean, kept: false}}
  */
-export function resolveKey({ global: useGlobal = false, existing = false, force = false } = {}) {
+export function resolveKey({ global: useGlobal = false, force = false } = {}) {
   const existingKey = gitConfig('nostr.privkey') || gitConfig('nostr.privkey', null, true);
-  if (existingKey && existing) return { privateKey: existingKey, publicKey: getPubkey(existingKey), created: false, kept: false };
-  if (existingKey && !force) return { privateKey: existingKey, publicKey: getPubkey(existingKey), created: false, kept: true };
+  if (existingKey && !force) return { privateKey: existingKey, publicKey: getPubkey(existingKey), created: false, kept: false };
   const { privateKey, publicKey } = generateKeypair();
   gitConfig('nostr.privkey', privateKey, useGlobal);
   return { privateKey, publicKey, created: true, kept: false };
@@ -422,13 +421,11 @@ export async function fund({ publicKey, voucher, voucherFile = null, global: use
  * @param {Object} options
  * @param {string} [options.voucher] - Voucher URI or file path (default: ~/.gitmark/faucet.txt)
  * @param {boolean} [options.global] - Use global git config
- * @param {boolean} [options.existing] - Fund the existing key instead of generating a new one
  * @param {boolean} [options.force] - Discard the existing key and generate a new one
- * @returns {Promise<{privateKey: string, publicKey: string, funded: boolean, existing?: boolean, txid?: string, explorer?: string, amount?: number}>}
+ * @returns {Promise<{privateKey: string, publicKey: string, funded: boolean, txid?: string, explorer?: string, amount?: number}>}
  */
 export async function fundAgent(options = {}) {
   const key = resolveKey(options);
-  if (key.kept) return { privateKey: key.privateKey, publicKey: key.publicKey, existing: true, funded: false };
 
   const v = resolveVoucher(options.voucher);
   if (!v) return { privateKey: key.privateKey, publicKey: key.publicKey, funded: false };
