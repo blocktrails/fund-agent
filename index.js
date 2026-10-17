@@ -247,34 +247,43 @@ export function resolveKey({ global: useGlobal = false, existing = false, force 
 }
 
 /**
- * Build, broadcast and record the funding transaction for a key
- * @param {Object} options
- * @param {string} options.publicKey - x-only key being funded
- * @param {{chain: string, txid: string, vout: number, privateKey: string, amount: number}} options.voucher - parsed voucher
- * @param {string|null} [options.voucherFile] - file the voucher came from, updated with the change
- * @param {boolean} [options.global] - where gitmark.network is written
- * @returns {Promise<{txid: string, explorer: string, amount: number, txoFile: string, txoCount: number, newVoucher: string|null}>}
+ * Build and sign the funding transaction for a voucher, without broadcasting.
+ * Output 0 pays the agent, output 1 (if any) is change back to the voucher key.
+ * BIP341 chains sign through btctx; the BLAKE2b chains sign the unified
+ * sighash (hash type 0x21) through lib/tx.js, so the spend cannot replay.
+ * @param {{publicKey: string, voucher: object}} options
+ * @returns {Promise<{hex: string, txid: string, chain: object, userAmount: number, changeAmount: number, sighash: string}>}
  */
-export async function fund({ publicKey, voucher, voucherFile = null, global: useGlobal = false }) {
+export async function buildFundingTx({ publicKey, voucher }) {
   const { chain, userAmount, changeAmount } = planFunding(voucher);
-  if (chain.sighash !== 'bip341') {
-    throw new Error(`${chain.name} (${voucher.chain}) spends need the unified sighash, which this version cannot sign. Sweep the voucher at https://bitcoin-kernel.com/utxo/ instead.`);
-  }
-
-  const { buildTx } = await import('btctx');
   const voucherPubkey = getPubkey(voucher.privateKey);
   const outputs = [{ pubkey: publicKey, amount: userAmount }];
   if (changeAmount > 0) outputs.push({ pubkey: voucherPubkey, amount: changeAmount });
+  const input = { privateKey: voucher.privateKey, publicKey: voucherPubkey, txid: voucher.txid, vout: voucher.vout, inputAmount: voucher.amount, outputs };
 
-  const { hex } = await buildTx({
-    privateKey: voucher.privateKey,
-    publicKey: voucherPubkey,
-    txid: voucher.txid,
-    vout: voucher.vout,
-    inputAmount: voucher.amount,
-    network: chain.network,
-    outputs,
-  });
+  let built;
+  if (chain.sighash === 'unified') {
+    const { buildUnifiedTx } = await import('./lib/tx.js');
+    built = buildUnifiedTx(input);
+  } else {
+    const { buildTx } = await import('btctx');
+    built = await buildTx({ ...input, network: chain.network });
+  }
+  return { hex: built.hex, txid: built.txid, chain, userAmount, changeAmount, sighash: chain.sighash };
+}
+
+/**
+ * Fund an agent key from a voucher: sign, broadcast, record the TXO, keep the change
+ * @param {Object} options
+ * @param {string} options.publicKey - x-only pubkey of the agent being funded
+ * @param {Object} options.voucher - parsed voucher (see parseVoucher)
+ * @param {string|null} [options.voucherFile] - file the voucher came from, updated with the change
+ * @param {boolean} [options.global] - write gitmark.network to the global git config
+ * @returns {Promise<{txid: string, explorer: string, amount: number, txoFile: string, txoCount: number, newVoucher: string|null}>}
+ */
+export async function fund({ publicKey, voucher, voucherFile = null, global: useGlobal = false }) {
+  const { hex, userAmount, changeAmount } = await buildFundingTx({ publicKey, voucher });
+  const chain = chainInfo(voucher.chain);
 
   const sendtx = (await import('sendtx')).default;
   const txid = await sendtx(hex, voucher.chain, { endpoint: chain.broadcast });

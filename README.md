@@ -136,12 +136,14 @@ txo:tbtc4:abc123def456:0?amount=5000000&key=0123456789abcdef...
 | `tbtc3` | Bitcoin testnet3 | mempool.space | BIP341 key path |
 | `signet` | Bitcoin signet | mempool.space | BIP341 key path |
 | `btc` | Bitcoin mainnet | mempool.space | BIP341 key path |
-| `txbt4` | Bitcoin BLAKE2b testnet4 | mempool.guide | unified sighash, not yet in this version |
-| `xbt` | Bitcoin BLAKE2b mainnet | mempool.guide | unified sighash, not yet in this version |
+| `txbt4` | Bitcoin BLAKE2b testnet4 | mempool.guide | unified sighash (0x21), replay-protected |
+| `xbt` | Bitcoin BLAKE2b mainnet | mempool.guide | unified sighash (0x21), replay-protected |
 
 The SHA256d chains and the BLAKE2b chains live on different explorers, so the chain in the voucher
 decides where the transaction is posted and where the explorer link points. A voucher on a BLAKE2b
-chain is recognised and refused with a pointer to https://bitcoin-kernel.com/utxo/, which can sweep it.
+chain is signed with the unified opt-in sighash from Knots (`lib/unified.js`, checked against the
+166 Knots vectors in `test/unified_sighash.json`), so the spend is valid only on that chain.
+`buildFundingTx` returns the signed hex without broadcasting, if you want to inspect it first.
 
 ## Related
 

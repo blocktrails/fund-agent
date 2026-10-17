@@ -54,7 +54,21 @@ test('version comes from package.json', () => {
   assert.match(VERSION, /^\d+\.\d+\.\d+$/);
 });
 
-test('fund refuses a BLAKE2b-chain voucher before touching the network', async () => {
-  const { fund } = await import('../index.js');
-  await assert.rejects(fund({ publicKey: key, voucher: { chain: 'txbt4', txid, vout: 0, privateKey: key, amount: 10000 } }), /unified sighash/);
+test('a BLAKE2b-chain voucher is signed with the unified sighash, a Core-chain one with BIP341', async () => {
+  const { buildFundingTx } = await import('../index.js');
+  const { parseTransaction } = await import('../lib/unified.js');
+  const { schnorr } = await import('@noble/curves/secp256k1');
+  const priv = '11'.repeat(32);
+  const pub = Buffer.from(schnorr.getPublicKey(Buffer.from(priv, 'hex'))).toString('hex');
+  const agent = '22'.repeat(32);
+  const u = await buildFundingTx({ publicKey: agent, voucher: { chain: 'txbt4', txid, vout: 0, privateKey: priv, amount: 10000 } });
+  assert.equal(u.sighash, 'unified');
+  assert.equal(u.userAmount, 9000);
+  assert.equal(u.changeAmount, 0);
+  const tx = parseTransaction(Uint8Array.from(Buffer.from(u.hex, 'hex')));
+  assert.equal(tx.inputs[0].witness[0].length, 65);
+  assert.equal(tx.inputs[0].witness[0][64], 0x21);
+  const b = await buildFundingTx({ publicKey: agent, voucher: { chain: 'tbtc4', txid, vout: 0, privateKey: priv, amount: 10000 } });
+  assert.equal(b.sighash, 'bip341');
+  assert.equal(parseTransaction(Uint8Array.from(Buffer.from(b.hex, 'hex'))).inputs[0].witness[0].length, 64);
 });
