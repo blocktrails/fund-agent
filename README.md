@@ -41,6 +41,9 @@ npx fund-agent --global
 npx fund-agent --dry-run
 ```
 
+The CLI is a thin layer over the library: `resolveVoucher`, `resolveKey`, `planFunding` and `fund` are
+the steps, and `fundAgent` runs them in one call.
+
 ### Programmatic
 
 ```javascript
@@ -97,6 +100,18 @@ Create a TXO voucher URI.
 
 Get or set git config values.
 
+### `planFunding(voucher)`
+
+The amounts a parsed voucher yields: `userAmount`, `changeAmount`, `fee`, and the `chain` entry.
+
+### `explorerUrl(chain, txid)`
+
+The explorer link for a transaction on that chain.
+
+### `CHAINS`
+
+The chain table: name, broadcast endpoint, explorer, and which sighash a spend needs.
+
 ## Voucher Format
 
 ```
@@ -113,11 +128,20 @@ txo:tbtc4:abc123def456:0?amount=5000000&key=0123456789abcdef...
 - `git config nostr.privkey` - Your private key
 - `.well-known/txo/txo.json` - Your TXO (spendable output)
 
-## Networks
+## Chains
 
-- `tbtc4` - Bitcoin Testnet4 (default)
-- `btc` - Bitcoin Mainnet
-- `signet` - Bitcoin Signet
+| id | chain | broadcast and explorer | signing |
+|---|---|---|---|
+| `tbtc4` | Bitcoin testnet4 (default) | mempool.space | BIP341 key path |
+| `tbtc3` | Bitcoin testnet3 | mempool.space | BIP341 key path |
+| `signet` | Bitcoin signet | mempool.space | BIP341 key path |
+| `btc` | Bitcoin mainnet | mempool.space | BIP341 key path |
+| `txbt4` | Bitcoin BLAKE2b testnet4 | mempool.guide | unified sighash, not yet in this version |
+| `xbt` | Bitcoin BLAKE2b mainnet | mempool.guide | unified sighash, not yet in this version |
+
+The SHA256d chains and the BLAKE2b chains live on different explorers, so the chain in the voucher
+decides where the transaction is posted and where the explorer link points. A voucher on a BLAKE2b
+chain is recognised and refused with a pointer to https://bitcoin-kernel.com/utxo/, which can sweep it.
 
 ## Related
 
