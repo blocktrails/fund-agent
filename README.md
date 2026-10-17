@@ -16,11 +16,42 @@ npx fund-agent
 
 ## Usage
 
+### Setting up, once
+
+```bash
+npx fund-agent init
+```
+
+This writes a new voucher key to `~/.gitmark/faucet.txt` and prints an address. Send coins there
+(default chain `txbt4`; `--chain xbt` or any id from the table below for another). From then on,
+in any repo:
+
+```bash
+npx fund-agent
+```
+
+The first run after the coins arrive finds them through the chain's explorer and fills in the
+outpoint; every run pays 1,000,000 sats to a fresh agent key and writes the change back to the file.
+`npx fund-agent status` shows the address, the balance and how many agents it still funds.
+
+If someone hands you a voucher string instead, store it with `npx fund-agent init "txo:…"`.
+`FUND_AGENT_FAUCET=<path>` moves the file.
+
 ### CLI
 
 ```bash
 # Initialize from default faucet (~/.gitmark/faucet.txt)
 npx fund-agent
+
+# Set up the voucher file: new key and an address to send coins to
+npx fund-agent init
+npx fund-agent init --chain xbt
+
+# Store a voucher string in the voucher file
+npx fund-agent init "txo:txbt4:abc123:0?amount=5000000&key=deadbeef..."
+
+# Address, balance, agents left
+npx fund-agent status
 
 # Initialize from voucher file
 npx fund-agent /path/to/voucher.txt
@@ -108,6 +139,25 @@ The amounts a parsed voucher yields: `userAmount`, `changeAmount`, `fee`, and th
 
 The explorer link for a transaction on that chain.
 
+### `createFaucet({ chain, privateKey })`
+
+A voucher key waiting for coins: `{ uri, chain, privateKey, publicKey, address, funded: false }`.
+The uri form is `txo:<chain>?key=<privkey>`.
+
+### `parseFaucet(uri)`
+
+Parses either form. A funded voucher comes back as from `parseVoucher` plus `publicKey`, `address`
+and `funded: true`.
+
+### `refreshVoucher({ uri, file }, { fetch })`
+
+For a waiting voucher, asks the chain's explorer for UTXOs at its address, takes the largest
+(confirmed first), rewrites the file with the full voucher and returns `{ voucher, utxos }`.
+
+### `addressOf(chain, pubkey)`, `lookupUtxos(chain, address)`, `agentsFrom(sats)`
+
+Raw-key taproot address for a chain, the explorer UTXO lookup, and how many agents an amount funds.
+
 ### `CHAINS`
 
 The chain table: name, broadcast endpoint, explorer, and which sighash a spend needs.
@@ -130,7 +180,7 @@ txo:tbtc4:abc123def456:0?amount=5000000&key=0123456789abcdef...
 
 ## Chains
 
-| id | chain | broadcast and explorer | signing |
+| id | chain | explorer API, broadcast and links | signing |
 |---|---|---|---|
 | `tbtc4` | Bitcoin testnet4 (default) | mempool.space | BIP341 key path |
 | `tbtc3` | Bitcoin testnet3 | mempool.space | BIP341 key path |

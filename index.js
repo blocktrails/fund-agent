@@ -10,11 +10,12 @@ import { createRequire } from 'module';
 import { execFileSync } from 'child_process';
 import { getPublicKey } from '@noble/secp256k1';
 import crypto from 'crypto';
+import { taprootAddress } from './lib/address.js';
 
 export const VERSION = createRequire(import.meta.url)('./package.json').version;
 export const INIT_AMOUNT = 1000000;
 export const MIN_FEE = 1000;
-export const DEFAULT_FAUCET = path.join(os.homedir(), '.gitmark', 'faucet.txt');
+export const DEFAULT_FAUCET = process.env.FUND_AGENT_FAUCET || path.join(os.homedir(), '.gitmark', 'faucet.txt');
 
 /**
  * Chains a voucher can name. `broadcast` is where the raw transaction is posted and `explorer`
@@ -24,13 +25,14 @@ export const DEFAULT_FAUCET = path.join(os.homedir(), '.gitmark', 'faucet.txt');
  * sighash, which this version cannot produce yet.
  */
 export const CHAINS = {
-  btc:    { name: 'Bitcoin mainnet',          network: 'mainnet', sighash: 'bip341',  broadcast: 'https://mempool.space/api/tx',          explorer: 'https://mempool.space/tx/' },
-  tbtc3:  { name: 'Bitcoin testnet3',         network: 'testnet', sighash: 'bip341',  broadcast: 'https://mempool.space/testnet/api/tx',  explorer: 'https://mempool.space/testnet/tx/' },
-  tbtc4:  { name: 'Bitcoin testnet4',         network: 'testnet', sighash: 'bip341',  broadcast: 'https://mempool.space/testnet4/api/tx', explorer: 'https://mempool.space/testnet4/tx/' },
-  signet: { name: 'Bitcoin signet',           network: 'testnet', sighash: 'bip341',  broadcast: 'https://mempool.space/signet/api/tx',   explorer: 'https://mempool.space/signet/tx/' },
-  txbt4:  { name: 'Bitcoin BLAKE2b testnet4', network: 'testnet', sighash: 'unified', broadcast: 'https://mempool.guide/testnet4/api/tx', explorer: 'https://mempool.guide/testnet4/tx/' },
-  xbt:    { name: 'Bitcoin BLAKE2b mainnet',  network: 'mainnet', sighash: 'unified', broadcast: 'https://mempool.guide/api/tx',          explorer: 'https://mempool.guide/tx/' },
+  btc:    { name: 'Bitcoin mainnet',          network: 'mainnet', sighash: 'bip341',  hrp: 'bc', api: 'https://mempool.space/api',          broadcast: 'https://mempool.space/api/tx',          explorer: 'https://mempool.space/tx/' },
+  tbtc3:  { name: 'Bitcoin testnet3',         network: 'testnet', sighash: 'bip341',  hrp: 'tb', api: 'https://mempool.space/testnet/api',  broadcast: 'https://mempool.space/testnet/api/tx',  explorer: 'https://mempool.space/testnet/tx/' },
+  tbtc4:  { name: 'Bitcoin testnet4',         network: 'testnet', sighash: 'bip341',  hrp: 'tb', api: 'https://mempool.space/testnet4/api', broadcast: 'https://mempool.space/testnet4/api/tx', explorer: 'https://mempool.space/testnet4/tx/' },
+  signet: { name: 'Bitcoin signet',           network: 'testnet', sighash: 'bip341',  hrp: 'tb', api: 'https://mempool.space/signet/api',   broadcast: 'https://mempool.space/signet/api/tx',   explorer: 'https://mempool.space/signet/tx/' },
+  txbt4:  { name: 'Bitcoin BLAKE2b testnet4', network: 'testnet', sighash: 'unified', hrp: 'tb', api: 'https://mempool.guide/testnet4/api', broadcast: 'https://mempool.guide/testnet4/api/tx', explorer: 'https://mempool.guide/testnet4/tx/' },
+  xbt:    { name: 'Bitcoin BLAKE2b mainnet',  network: 'mainnet', sighash: 'unified', hrp: 'bc', api: 'https://mempool.guide/api',          broadcast: 'https://mempool.guide/api/tx',          explorer: 'https://mempool.guide/tx/' },
 };
+export const DEFAULT_CHAIN = 'txbt4';
 // Chains accepted in a voucher's chain segment: the keys of CHAINS.
 export const KNOWN_CHAINS = new Set(Object.keys(CHAINS));
 
@@ -195,6 +197,90 @@ export function loadVoucher(filePath) {
  */
 export function saveVoucher(uri, filePath) {
   fs.writeFileSync(filePath, uri + '\n');
+}
+
+/**
+ * Raw-key taproot address of an x-only pubkey on a chain (tb1p… or bc1p…)
+ * @param {string} chainId
+ * @param {string} pubkey - 64-char hex x-only pubkey
+ * @returns {string}
+ */
+export function addressOf(chainId, pubkey) {
+  return taprootAddress(pubkey, chainInfo(chainId).hrp);
+}
+
+/**
+ * A voucher that is waiting for coins: a key and a chain, no outpoint yet.
+ * Written as txo:<chain>?key=<privkey>; send coins to its address and the
+ * next run fills in the outpoint from the chain's explorer.
+ * @param {{chain?: string, privateKey?: string}} [options]
+ * @returns {{uri: string, chain: string, privateKey: string, publicKey: string, address: string, funded: false}}
+ */
+export function createFaucet({ chain = DEFAULT_CHAIN, privateKey = generatePrivateKey() } = {}) {
+  chainInfo(chain);
+  const publicKey = getPubkey(privateKey);
+  return { uri: `txo:${chain}?key=${privateKey}`, chain, privateKey, publicKey, address: addressOf(chain, publicKey), funded: false };
+}
+
+/**
+ * Parse either voucher form. A funded voucher parses as parseVoucher does,
+ * plus publicKey, address and funded: true; the waiting form gives funded: false.
+ * @param {string} uri
+ */
+export function parseFaucet(uri) {
+  let u = uri.trim();
+  if (u.startsWith('urn:voucher:')) u = u.slice('urn:voucher:'.length);
+  const waiting = u.match(/^txo:([a-z0-9]+)\?key=([0-9a-fA-F]{64})$/);
+  if (waiting) return createFaucet({ chain: waiting[1], privateKey: waiting[2] });
+  const v = parseVoucher(u);
+  const publicKey = getPubkey(v.privateKey);
+  return { ...v, uri: createVoucher(v), publicKey, address: addressOf(v.chain, publicKey), funded: true };
+}
+
+/**
+ * UTXOs at an address, from the chain's explorer API
+ * @param {string} chainId
+ * @param {string} address
+ * @param {{fetch?: typeof fetch}} [options]
+ * @returns {Promise<{txid: string, vout: number, value: number, confirmed: boolean}[]>}
+ */
+export async function lookupUtxos(chainId, address, { fetch: f = globalThis.fetch } = {}) {
+  const url = `${chainInfo(chainId).api}/address/${address}/utxo`;
+  const res = await f(url, { headers: { accept: 'application/json' } });
+  if (!res.ok) throw new Error(`Explorer lookup failed: ${res.status} ${url}`);
+  const rows = await res.json();
+  if (!Array.isArray(rows)) throw new Error(`Explorer lookup failed: unexpected reply from ${url}`);
+  return rows.map((r) => ({ txid: r.txid, vout: r.vout, value: Number(r.value), confirmed: !!(r.status && r.status.confirmed) }));
+}
+
+/**
+ * Turn a waiting voucher into a funded one if coins have arrived: the largest
+ * UTXO at its address (confirmed first) becomes the outpoint, and the file,
+ * if any, is rewritten. A funded voucher is returned as is.
+ * @param {{uri: string, file: string|null}} v
+ * @param {{fetch?: typeof fetch}} [options]
+ * @returns {Promise<{voucher: object, utxos: object[]}>}
+ */
+export async function refreshVoucher(v, options = {}) {
+  const parsed = parseFaucet(v.uri);
+  if (parsed.funded) return { voucher: parsed, utxos: [] };
+  const utxos = await lookupUtxos(parsed.chain, parsed.address, options);
+  const pick = [...utxos].sort((a, b) => (b.confirmed - a.confirmed) || (b.value - a.value))[0];
+  if (!pick) return { voucher: parsed, utxos };
+  const uri = createVoucher({ chain: parsed.chain, txid: pick.txid, vout: pick.vout, privateKey: parsed.privateKey, amount: pick.value });
+  if (v.file) saveVoucher(uri, v.file);
+  return { voucher: parseFaucet(uri), utxos };
+}
+
+/**
+ * How many agents a voucher funds at INIT_AMOUNT each, plus a smaller last one
+ * @param {number} amount - sats
+ * @returns {{full: number, partial: boolean}}
+ */
+export function agentsFrom(amount) {
+  const full = Math.floor(amount / (INIT_AMOUNT + MIN_FEE));
+  const rest = amount - full * (INIT_AMOUNT + MIN_FEE);
+  return { full, partial: rest > MIN_FEE };
 }
 
 /**
