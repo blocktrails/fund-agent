@@ -72,3 +72,54 @@ test('a BLAKE2b-chain voucher is signed with the unified sighash, a Core-chain o
   assert.equal(b.sighash, 'bip341');
   assert.equal(parseTransaction(Uint8Array.from(Buffer.from(b.hex, 'hex'))).inputs[0].witness[0].length, 64);
 });
+
+test('addresses: raw-key taproot, checked against Knots deriveaddresses', async () => {
+  const { addressOf, createFaucet, parseFaucet } = await import('../index.js');
+  assert.equal(addressOf('txbt4', '22'.repeat(32)), 'tb1pyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3q7fyw6k');
+  assert.equal(addressOf('tbtc4', '79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d9959f2815b16f8179'), 'tb1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3kv4nu5ptvt0s9usdrnxmp');
+  assert.match(addressOf('btc', '22'.repeat(32)), /^bc1p/);
+  const f = createFaucet({ chain: 'txbt4', privateKey: key });
+  assert.equal(f.funded, false);
+  assert.equal(f.uri, `txo:txbt4?key=${key}`);
+  assert.deepEqual(parseFaucet(`urn:voucher:${f.uri}`), f);
+  const v = parseFaucet(`txo:txbt4:${txid}:1?amount=5000&key=${key}`);
+  assert.equal(v.funded, true);
+  assert.equal(v.address, f.address);
+  assert.throws(() => createFaucet({ chain: 'doge' }), /Unknown chain/);
+});
+
+test('refreshVoucher fills in the largest confirmed UTXO and rewrites the file', async () => {
+  const { createFaucet, refreshVoucher, agentsFrom, loadVoucher } = await import('../index.js');
+  const fs = await import('node:fs');
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fund-agent-'));
+  const file = path.join(dir, 'faucet.txt');
+  const f = createFaucet({ chain: 'txbt4', privateKey: key });
+  fs.writeFileSync(file, f.uri + '\n');
+  const calls = [];
+  const fetch = async (url) => { calls.push(url); return { ok: true, json: async () => [
+    { txid: 'aa'.repeat(32), vout: 0, value: 50000, status: { confirmed: false } },
+    { txid: 'bb'.repeat(32), vout: 2, value: 20000, status: { confirmed: true } },
+    { txid: 'cc'.repeat(32), vout: 1, value: 30000, status: { confirmed: true } },
+  ] }; };
+  const r = await refreshVoucher({ uri: f.uri, file }, { fetch });
+  assert.equal(calls[0], `https://mempool.guide/testnet4/api/address/${f.address}/utxo`);
+  assert.equal(r.voucher.funded, true);
+  assert.equal(r.voucher.txid, 'cc'.repeat(32));
+  assert.equal(r.voucher.vout, 1);
+  assert.equal(r.voucher.amount, 30000);
+  assert.equal(loadVoucher(file), `txo:txbt4:${'cc'.repeat(32)}:1?amount=30000&key=${key}`);
+  const empty = await refreshVoucher({ uri: f.uri, file: null }, { fetch: async () => ({ ok: true, json: async () => [] }) });
+  assert.equal(empty.voucher.funded, false);
+  assert.deepEqual(agentsFrom(30000), { full: 0, partial: true });
+  assert.deepEqual(agentsFrom(2 * (INIT_AMOUNT + MIN_FEE) + 500), { full: 2, partial: false });
+  fs.rmSync(dir, { recursive: true });
+});
+
+test('every chain has an hrp and an api base the broadcast endpoint hangs off', () => {
+  for (const [id, c] of Object.entries(CHAINS)) {
+    assert.ok(['tb', 'bc'].includes(c.hrp), id);
+    assert.equal(c.broadcast, `${c.api}/tx`, id);
+  }
+});
