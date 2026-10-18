@@ -182,6 +182,38 @@ test('fund: change becomes the next voucher; with no change the key waits in the
   }
 });
 
+test('balanceOf lists a key\'s coins, confirmed first, with totals', async () => {
+  const { balanceOf, addressOf, getPubkey } = await import('../index.js');
+  const pub = getPubkey(key);
+  const rows = [
+    { txid: 'aa'.repeat(32), vout: 0, value: 10000, status: { confirmed: false } },
+    { txid: 'bb'.repeat(32), vout: 1, value: 4000, status: { confirmed: true } },
+  ];
+  const seen = [];
+  const fetch = async (url) => { seen.push(url); return { ok: true, json: async () => rows }; };
+  const b = await balanceOf('txbt4', pub, { fetch });
+  assert.equal(b.address, addressOf('txbt4', pub));
+  assert.match(seen[0], new RegExp(`/address/${b.address}/utxo$`));
+  assert.deepEqual(b.utxos.map((u) => u.vout), [1, 0]);
+  assert.equal(b.confirmed, 4000);
+  assert.equal(b.pending, 10000);
+  assert.equal(b.total, 14000);
+});
+
+test('balance refuses without an agent key in git config', async () => {
+  const { execFileSync, spawnSync } = await import('node:child_process');
+  const fs = await import('node:fs');
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fund-agent-'));
+  const bin = new URL('../bin/fund-agent.js', import.meta.url).pathname;
+  execFileSync('git', ['init', '-q'], { cwd: dir });
+  const r = spawnSync(process.execPath, [bin, 'balance'], { cwd: dir, encoding: 'utf8', env: { ...process.env, GIT_CONFIG_GLOBAL: path.join(dir, 'none') } });
+  assert.equal(r.status, 1);
+  assert.match(r.stderr, /No agent key in git config/);
+  fs.rmSync(dir, { recursive: true });
+});
+
 test('resolveKey funds the key already in git config; --force replaces it', async () => {
   const { resolveKey, getPubkey } = await import('../index.js');
   const { execFileSync } = await import('node:child_process');

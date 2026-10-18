@@ -16,7 +16,7 @@ back to the voucher file so the next repo is the same one line.
 
 - Right after `npm init agent`, to give the new key coins.
 - Any time a repo's agent key has no coin in `.well-known/txo/txo.json`.
-- To set up or inspect the voucher file: `init`, `status`.
+- To set up or inspect the voucher file: `init`, `status`. To see what the agent's own key holds: `balance`.
 
 ## The one line
 
@@ -46,6 +46,12 @@ npx fund-agent init "txo:…"      # store a voucher string someone gave you
 npx fund-agent status            # chain, address, balance, how many agents it still funds
 ```
 
+After funding, in the agent's repo:
+
+```bash
+npx fund-agent balance           # the agent key's address, its coins as txo: URIs, and the total
+```
+
 On this machine the txbt4 faucet (`/faucet` skill) can pay the printed address: `faucet pay <address> 0.01`.
 
 ## Arguments
@@ -55,7 +61,8 @@ On this machine the txbt4 faucet (`/faucet` skill) can pay the printed address: 
 | `[voucher]` | A `txo:` voucher URI or a path to a file holding one, instead of the default file |
 | `init [voucher]` | Set up the voucher file (see above) |
 | `status` | Show what the voucher file holds |
-| `--chain <id>` | Chain for a new voucher key (`init` only) |
+| `balance` | Show the coins at this repo's agent key (chain from git config `gitmark.network`) |
+| `--chain <id>` | Chain for a new voucher key (`init`), or the chain to look on (`balance`) |
 | `--global` | Store the agent key in global git config |
 | `--force` | Replace the existing agent key with a new one (the old key is lost) |
 | `--no-fund` | Make the key only, do not look for a voucher |

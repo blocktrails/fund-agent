@@ -33,6 +33,7 @@ npx fund-agent
 The first run after the coins arrive finds them through the chain's explorer and fills in the
 outpoint; every run pays 10,000 sats to a fresh agent key and writes the change back to the file.
 `npx fund-agent status` shows the address, the balance and how many agents it still funds.
+In a funded repo, `npx fund-agent balance` shows what the agent's own key holds.
 
 If someone hands you a voucher string instead, store it with `npx fund-agent init "txo:…"`.
 `FUND_AGENT_FAUCET=<path>` moves the file.
@@ -52,6 +53,9 @@ npx fund-agent init "txo:txbt4:abc123:0?amount=5000000&key=deadbeef..."
 
 # Address, balance, agents left
 npx fund-agent status
+
+# What this repo's agent key holds (chain from git config gitmark.network, or --chain)
+npx fund-agent balance
 
 # Initialize from voucher file
 npx fund-agent /path/to/voucher.txt
@@ -154,6 +158,9 @@ and `funded: true`.
 
 For a waiting voucher, asks the chain's explorer for UTXOs at its address, takes the largest
 (confirmed first), rewrites the file with the full voucher and returns `{ voucher, utxos }`.
+
+### `balanceOf(chain, pubkey, { fetch })`
+Returns `{ chain, address, utxos, confirmed, pending, total }` for a key: its coins from the chain's explorer, confirmed first.
 
 ### `addressOf(chain, pubkey)`, `lookupUtxos(chain, address)`, `agentsFrom(sats)`
 

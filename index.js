@@ -254,6 +254,22 @@ export async function lookupUtxos(chainId, address, { fetch: f = globalThis.fetc
 }
 
 /**
+ * What a key holds on a chain: its address, every coin there and the totals
+ * @param {string} chainId
+ * @param {string} pubkey - 32-byte x-only hex
+ * @param {{fetch?: typeof fetch}} [options]
+ * @returns {Promise<{chain: string, address: string, utxos: object[], confirmed: number, pending: number, total: number}>}
+ */
+export async function balanceOf(chainId, pubkey, options = {}) {
+  const address = addressOf(chainId, pubkey);
+  const utxos = (await lookupUtxos(chainId, address, options)).sort((a, b) => (b.confirmed - a.confirmed) || (b.value - a.value));
+  const sum = (rows) => rows.reduce((a, u) => a + u.value, 0);
+  const confirmed = sum(utxos.filter((u) => u.confirmed));
+  const pending = sum(utxos.filter((u) => !u.confirmed));
+  return { chain: chainId, address, utxos, confirmed, pending, total: confirmed + pending };
+}
+
+/**
  * Turn a waiting voucher into a funded one if coins have arrived: the largest
  * UTXO at its address (confirmed first) becomes the outpoint, and the file,
  * if any, is rewritten. A funded voucher is returned as is.

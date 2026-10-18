@@ -8,12 +8,13 @@
  *   npx fund-agent init            make a voucher key and print the address to send coins to
  *   npx fund-agent init <voucher>  store a voucher string in the default file
  *   npx fund-agent status          chain, address, balance, agents it funds
+ *   npx fund-agent balance         what this repo's agent key holds
  */
 
 import {
   VERSION, CHAINS, DEFAULT_CHAIN, DEFAULT_FAUCET, INIT_AMOUNT, MIN_FEE,
   isGitRepo, resolveKey, resolveVoucher, parseFaucet, createFaucet, refreshVoucher, lookupUtxos, saveVoucher,
-  planFunding, agentsFrom, fund, chainInfo,
+  planFunding, agentsFrom, fund, chainInfo, gitConfig, getPubkey, balanceOf,
 } from '../index.js';
 import fs from 'fs';
 import path from 'path';
@@ -28,6 +29,7 @@ Usage:
   npx fund-agent [options] [voucher]      fund this repo's agent
   npx fund-agent init [voucher]           set up the voucher file
   npx fund-agent status                   what the voucher file holds
+  npx fund-agent balance                  what this repo's agent key holds
 
 The voucher file: ${DEFAULT_FAUCET}
   (override with FUND_AGENT_FAUCET=<path>)
@@ -47,7 +49,7 @@ Arguments:
 Options:
   -h, --help     Show this help message
   -v, --version  Show version number
-  --chain <id>   Chain for a new voucher key (init only)
+  --chain <id>   Chain for a new voucher key (init), or to look on (balance)
   --global       Store key in global git config (default: local)
   --force        Discard the existing key and generate + fund a new one
   --no-fund      Generate the key only, do not look for a voucher
@@ -71,7 +73,7 @@ const dryRun = args.includes('--dry-run');
 const noFund = args.includes('--no-fund');
 const chainFlag = flag('--chain');
 const positional = args.filter((a, i) => !a.startsWith('-') && args[i - 1] !== '--chain');
-const command = ['init', 'status'].includes(positional[0]) ? positional.shift() : 'fund';
+const command = ['init', 'status', 'balance'].includes(positional[0]) ? positional.shift() : 'fund';
 const voucherArg = positional[0];
 
 function die(msg) { console.error(`Error: ${msg}`); process.exit(1); }
@@ -134,10 +136,25 @@ async function status() {
   if (!voucher.funded) waitingNotice(voucher, utxos);
 }
 
+async function balance() {
+  const privateKey = gitConfig('nostr.privkey') || gitConfig('nostr.privkey', null, true);
+  if (!privateKey) die('No agent key in git config (nostr.privkey). Run: npm init agent, then npx fund-agent');
+  const chain = chainFlag || gitConfig('gitmark.network') || gitConfig('gitmark.network', null, true) || DEFAULT_CHAIN;
+  const b = await balanceOf(chain, getPubkey(privateKey));
+  console.log(`Chain:   ${chain} (${chainInfo(chain).name})`);
+  console.log(`Address: ${b.address}`);
+  for (const u of b.utxos) {
+    console.log(`  ${u.value.toLocaleString().padStart(12)} sats  txo:${chain}:${u.txid}:${u.vout}${u.confirmed ? '' : '  (unconfirmed)'}`);
+  }
+  if (!b.utxos.length) console.log('  no coins');
+  console.log(`Balance: ${b.total.toLocaleString()} sats${b.pending ? ` (${b.pending.toLocaleString()} unconfirmed)` : ''}`);
+}
+
 async function main() {
   console.log(`=== fund-agent v${VERSION} ===\n`);
   if (command === 'init') return init();
   if (command === 'status') return status();
+  if (command === 'balance') return balance();
 
   if (!useGlobal && !isGitRepo()) die('Not in a git repository. Use --global for global config.');
 
