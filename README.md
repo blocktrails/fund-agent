@@ -36,6 +36,10 @@ outpoint; every run pays 10,000 sats to a fresh agent key and writes the change 
 In a funded repo, `npx fund-agent balance` shows what the agent's own key holds, and after `git mark`
 the trail's current coin too.
 
+When an agent retires, `git mark exodus` sends its coin back to the voucher address, where it sits as a
+separate UTXO. `npx fund-agent consolidate` merges every confirmed coin there into one and makes that
+the voucher, so returned coins fund agents again. `--dry-run` prints the plan and the raw transaction.
+
 If someone hands you a voucher string instead, store it with `npx fund-agent init "txo:…"`.
 `FUND_AGENT_FAUCET=<path>` moves the file.
 
@@ -57,6 +61,9 @@ npx fund-agent status
 
 # What this repo's agent key holds (chain from git config gitmark.network, or --chain)
 npx fund-agent balance
+
+# Merge the returned coins at the voucher address into one (--dry-run to look first)
+npx fund-agent consolidate
 
 # Initialize from voucher file
 npx fund-agent /path/to/voucher.txt
@@ -166,6 +173,13 @@ Returns `{ chain, address, utxos, confirmed, pending, total }` for a key: its co
 ### `trailTxo()`, `parseTxo(uri)`, `lookupOutput(chain, { txid, vout }, { fetch })`
 The trail coin git mark keeps in git config `gitmark.txo`, the plain `txo:` parser it needs, and one output looked up
 on the explorer: `{ address, amount, confirmed, spent }`.
+
+### `consolidate({ voucher, voucherFile, dryRun, fetch })`, `planConsolidation(chain, utxos)`, `buildConsolidationTx({ voucher, utxos })`
+
+Every confirmed coin at the voucher address, largest first, into one output back to the voucher key, fee
+`consolidationFee(n)` = 1,000 sats plus 100 per extra input. Refuses while a coin there is unconfirmed, with fewer
+than two coins, or when the result would be under 10,000 sats. On the BLAKE2b chains only (unified sighash). The
+merged coin is written to the voucher file.
 
 ### `addressOf(chain, pubkey)`, `lookupUtxos(chain, address)`, `agentsFrom(sats)`
 

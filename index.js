@@ -432,6 +432,71 @@ export async function buildFundingTx({ publicKey, voucher }) {
 }
 
 /**
+ * Fee for a spend with n taproot inputs and one output: MIN_FEE plus 100 sats per extra input
+ * @param {number} n
+ * @returns {number}
+ */
+export function consolidationFee(n) {
+  return MIN_FEE + 100 * Math.max(0, n - 1);
+}
+
+/**
+ * Plan merging every confirmed coin at the voucher address into one.
+ * Refuses while anything there is unconfirmed (a funding may be in flight) and when there is nothing to merge.
+ * @param {string} chainId
+ * @param {{txid: string, vout: number, value: number, confirmed: boolean}[]} utxos
+ * @returns {{chain: object, inputs: object[], total: number, fee: number, amount: number}}
+ */
+export function planConsolidation(chainId, utxos) {
+  const chain = chainInfo(chainId);
+  if (chain.sighash !== 'unified') throw new Error(`consolidate signs the unified sighash; ${chainId} is not supported yet`);
+  const pending = utxos.filter((u) => !u.confirmed);
+  if (pending.length) throw new Error(`${pending.length} unconfirmed coin${pending.length === 1 ? '' : 's'} at the voucher address; wait for a block and run again`);
+  const inputs = [...utxos].sort((a, b) => b.value - a.value);
+  if (inputs.length < 2) throw new Error(inputs.length ? 'One coin at the voucher address; nothing to merge' : 'No coins at the voucher address');
+  const total = inputs.reduce((a, u) => a + u.value, 0);
+  const fee = consolidationFee(inputs.length);
+  const amount = total - fee;
+  if (amount < INIT_AMOUNT) throw new Error(`Merged coin would be ${amount} sats, under ${INIT_AMOUNT}; not worth the fee`);
+  return { chain, inputs, total, fee, amount };
+}
+
+/**
+ * Build and sign the consolidation: every input at the voucher key, one output back to it
+ * @param {{voucher: {chain: string, privateKey: string}, utxos: object[]}} options
+ * @returns {Promise<{hex: string, txid: string, plan: object}>}
+ */
+export async function buildConsolidationTx({ voucher, utxos }) {
+  const plan = planConsolidation(voucher.chain, utxos);
+  const publicKey = getPubkey(voucher.privateKey);
+  const { buildUnifiedTx } = await import('./lib/tx.js');
+  const built = buildUnifiedTx({
+    privateKey: voucher.privateKey,
+    publicKey,
+    inputs: plan.inputs.map((u) => ({ txid: u.txid, vout: u.vout, amount: u.value })),
+    outputs: [{ pubkey: publicKey, amount: plan.amount }],
+  });
+  return { hex: built.hex, txid: built.txid, plan };
+}
+
+/**
+ * Merge every coin at the voucher address into one, and make that coin the voucher.
+ * Returned coins from retired agents (git mark exodus) land at the address as separate UTXOs
+ * that nothing else spends; this is how they rejoin the pool.
+ * @param {{voucher: {chain: string, privateKey: string, address: string}, voucherFile?: string|null, dryRun?: boolean, fetch?: typeof fetch}} options
+ * @returns {Promise<{txid: string|null, hex: string, plan: object, newVoucher: string|null}>}
+ */
+export async function consolidate({ voucher, voucherFile = null, dryRun = false, fetch: f = globalThis.fetch }) {
+  const utxos = await lookupUtxos(voucher.chain, voucher.address, { fetch: f });
+  const { hex, plan } = await buildConsolidationTx({ voucher, utxos });
+  if (dryRun) return { txid: null, hex, plan, newVoucher: null };
+  const txid = await broadcast(hex, voucher.chain, { fetch: f });
+  const newVoucher = createVoucher({ chain: voucher.chain, txid, vout: 0, privateKey: voucher.privateKey, amount: plan.amount });
+  if (voucherFile) saveVoucher(newVoucher, voucherFile);
+  return { txid, hex, plan, newVoucher };
+}
+
+/**
  * Fund an agent key from a voucher: sign, broadcast, record the TXO, keep the change
  * @param {Object} options
  * @param {string} options.publicKey - x-only pubkey of the agent being funded

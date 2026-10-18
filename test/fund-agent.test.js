@@ -264,3 +264,87 @@ test('resolveKey funds the key already in git config; --force replaces it', asyn
     fs.rmSync(dir, { recursive: true });
   }
 });
+
+test('planConsolidation: confirmed coins only, at least two, unified chains, worth the fee', async () => {
+  const { planConsolidation, consolidationFee } = await import('../index.js');
+  const a = { txid: 'aa'.repeat(32), vout: 0, value: 8800, confirmed: true };
+  const b = { txid: 'bb'.repeat(32), vout: 1, value: 857000, confirmed: true };
+  const p = planConsolidation('txbt4', [a, b]);
+  assert.deepEqual(p.inputs.map((u) => u.vout), [1, 0]);           // largest first
+  assert.equal(p.total, 865800);
+  assert.equal(p.fee, consolidationFee(2));
+  assert.equal(p.fee, MIN_FEE + 100);
+  assert.equal(p.amount, 865800 - MIN_FEE - 100);
+  assert.throws(() => planConsolidation('txbt4', [a, { ...b, confirmed: false }]), /unconfirmed coin/);
+  assert.throws(() => planConsolidation('txbt4', [b]), /nothing to merge/);
+  assert.throws(() => planConsolidation('txbt4', []), /No coins/);
+  assert.throws(() => planConsolidation('tbtc4', [a, b]), /not supported yet/);
+  assert.throws(() => planConsolidation('txbt4', [{ ...a, value: 5000 }, { ...b, value: 5000 }]), /not worth the fee/);
+});
+
+test('buildConsolidationTx: every input signed for the unified message at the voucher key, one output back to it', async () => {
+  const { buildConsolidationTx, getPubkey } = await import('../index.js');
+  const { unifiedSighash, parseTransaction, SCRIPT_TYPE_TAPROOT } = await import('../lib/unified.js');
+  const { p2trScript, HASH_TYPE } = await import('../lib/tx.js');
+  const { schnorr } = await import('@noble/curves/secp256k1');
+  const unhex = (s) => Uint8Array.from(Buffer.from(s, 'hex'));
+  const hex = (b) => Buffer.from(b).toString('hex');
+  const pub = getPubkey(key);
+  const utxos = [
+    { txid: 'aa'.repeat(32), vout: 0, value: 8800, confirmed: true },
+    { txid: 'bb'.repeat(32), vout: 1, value: 857000, confirmed: true },
+    { txid: 'cc'.repeat(32), vout: 3, value: 9400, confirmed: true },
+  ];
+  const r = await buildConsolidationTx({ voucher: { chain: 'txbt4', privateKey: key }, utxos });
+  const tx = parseTransaction(unhex(r.hex));
+  assert.equal(tx.inputs.length, 3);
+  assert.equal(tx.outputs.length, 1);
+  assert.equal(hex(tx.outputs[0].script), hex(p2trScript(pub)));
+  assert.equal(tx.outputs[0].value, BigInt(r.plan.amount));
+  const spent = r.plan.inputs.map((u) => ({ value: BigInt(u.value), script: p2trScript(pub) }));
+  for (let i = 0; i < 3; i++) {
+    assert.equal(hex(Uint8Array.from(tx.inputs[i].txid).reverse()), r.plan.inputs[i].txid);
+    const w = tx.inputs[i].witness[0];
+    assert.equal(w.length, 65);
+    assert.equal(w[64], HASH_TYPE);
+    assert.ok(schnorr.verify(w.slice(0, 64), unifiedSighash(tx, i, HASH_TYPE, SCRIPT_TYPE_TAPROOT, spent), unhex(pub)), `input ${i}`);
+  }
+});
+
+test('consolidate: looks the address up, dry run posts nothing, a real run posts once and the merged coin becomes the voucher', async () => {
+  const { consolidate, createFaucet, loadVoucher, parseFaucet } = await import('../index.js');
+  const fs = await import('node:fs');
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fund-agent-'));
+  try {
+    const file = path.join(dir, 'faucet.txt');
+    const voucher = parseFaucet(createFaucet({ chain: 'txbt4', privateKey: key }).uri);
+    fs.writeFileSync(file, voucher.uri + '\n');
+    const rows = [
+      { txid: 'aa'.repeat(32), vout: 0, value: 8800, status: { confirmed: true } },
+      { txid: 'bb'.repeat(32), vout: 1, value: 857000, status: { confirmed: true } },
+    ];
+    const calls = [];
+    const fetch = async (url, init = {}) => {
+      calls.push(`${init.method || 'GET'} ${url}`);
+      if (url.endsWith(`/address/${voucher.address}/utxo`)) return { ok: true, json: async () => rows };
+      if (init.method === 'POST') return { ok: true, status: 200, text: async () => 'ee'.repeat(32) };
+      return { ok: false, status: 404, text: async () => 'not stubbed' };
+    };
+    const dry = await consolidate({ voucher, voucherFile: file, dryRun: true, fetch });
+    assert.equal(dry.txid, null);
+    assert.match(dry.hex, /^0200/);
+    assert.equal(calls.filter((c) => c.startsWith('POST')).length, 0);
+    assert.equal(loadVoucher(file), voucher.uri);                       // untouched
+    const real = await consolidate({ voucher, voucherFile: file, fetch });
+    assert.equal(real.txid, 'ee'.repeat(32));
+    assert.equal(calls.filter((c) => c.startsWith('POST')).length, 1);
+    assert.equal(real.newVoucher, `txo:txbt4:${'ee'.repeat(32)}:0?amount=${865800 - MIN_FEE - 100}&key=${key}`);
+    assert.equal(loadVoucher(file), real.newVoucher);
+    rows[0].status.confirmed = false;
+    await assert.rejects(consolidate({ voucher, voucherFile: file, fetch }), /unconfirmed/);
+  } finally {
+    fs.rmSync(dir, { recursive: true });
+  }
+});

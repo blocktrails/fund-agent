@@ -17,6 +17,7 @@ back to the voucher file so the next repo is the same one line.
 - Right after `npm init agent`, to give the new key coins.
 - Any time a repo's agent key has no coin in `.well-known/txo/txo.json`.
 - To set up or inspect the voucher file: `init`, `status`. To see what the agent's own key holds: `balance`.
+- After agents retire with `git mark exodus`: `consolidate`, so the returned coins fund agents again.
 
 ## The one line
 
@@ -67,8 +68,16 @@ git mark exodus <that address> --dry       # read the transaction first
 git mark exodus <that address>             # send it
 ```
 
-The returned coin lands as a separate UTXO at the voucher address; the voucher file still points at its own
-coin and is not changed. See the gitmark SKILL for what exodus records in the repo.
+The returned coin lands as a separate UTXO at the voucher address, which the voucher file does not know about.
+Merge it back into the pool once it has confirmed:
+
+```bash
+npx fund-agent consolidate --dry-run    # the coins it would merge, the fee, the raw transaction
+npx fund-agent consolidate              # one coin at the voucher address; the file now points at it
+```
+
+It refuses while any coin at the address is unconfirmed, so it never races a funding in flight, and with fewer
+than two coins. See the gitmark SKILL for what exodus records in the repo.
 
 ## Arguments
 
@@ -78,6 +87,7 @@ coin and is not changed. See the gitmark SKILL for what exodus records in the re
 | `init [voucher]` | Set up the voucher file (see above) |
 | `status` | Show what the voucher file holds |
 | `balance` | Show the coins at this repo's agent key, plus the trail coin from `gitmark.txo` if git mark has run. A closed trail (after `git mark exodus`) has none |
+| `consolidate` | Merge every confirmed coin at the voucher address into one and make it the voucher. `--dry-run` to look first |
 | `--chain <id>` | Chain for a new voucher key (`init`), or the chain to look on (`balance`) |
 | `--global` | Store the agent key in global git config |
 | `--force` | Replace the existing agent key with a new one (the old key is lost) |
