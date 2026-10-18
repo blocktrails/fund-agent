@@ -41,6 +41,12 @@ separate UTXO. `npx fund-agent consolidate` merges every confirmed coin there in
 the voucher, so returned coins fund agents again. `--dry-run` prints the plan and the raw transaction.
 
 If someone hands you a voucher string instead, store it with `npx fund-agent init "txo:…"`.
+
+No coins at all? On the test chains there is a public bootstrap address, funded by whoever mines, whose key
+everyone knows: `npx fund-agent init --bootstrap` takes one coin from it, one million sats, into a fresh key
+of your own and writes that as your voucher file. The key is sha256 of the text `fund-agent bootstrap`,
+so it is no secret and anyone can empty the address; on a chain worth nothing that is the point.
+txbt4 address: `tb1pqz7yl29ke4hdsj6t2lpae0lkln0turndjckss5fx39d0fd8m0vmse7f7g7`. Refused on mainnet chains.
 `FUND_AGENT_FAUCET=<path>` moves the file.
 
 ### CLI
@@ -61,6 +67,9 @@ npx fund-agent status
 
 # What this repo's agent key holds (chain from git config gitmark.network, or --chain)
 npx fund-agent balance
+
+# Start a faucet of your own from the public bootstrap address (test chains; --dry-run to look first)
+npx fund-agent init --bootstrap
 
 # Merge the returned coins at the voucher address into one (--dry-run to look first)
 npx fund-agent consolidate
@@ -173,6 +182,11 @@ Returns `{ chain, address, utxos, confirmed, pending, total }` for a key: its co
 ### `trailTxo()`, `parseTxo(uri)`, `lookupOutput(chain, { txid, vout }, { fetch })`
 The trail coin git mark keeps in git config `gitmark.txo`, the plain `txo:` parser it needs, and one output looked up
 on the explorer: `{ address, amount, confirmed, spent }`.
+
+### `bootstrap({ chain, voucherFile, dryRun, fetch, random })`, `bootstrapFaucet(chain)`, `planBootstrap(utxos)`, `BOOTSTRAP_KEY`, `BOOTSTRAP_COIN`
+
+One confirmed coin at the public bootstrap address, picked at random, spent whole (less 1,000 sats) to a fresh key that
+becomes the voucher file. `BOOTSTRAP_COIN` (1,001,000 sats) is what a loader puts in each coin. Mainnet chains throw.
 
 ### `consolidate({ voucher, voucherFile, dryRun, fetch })`, `planConsolidation(chain, utxos)`, `buildConsolidationTx({ voucher, utxos })`
 

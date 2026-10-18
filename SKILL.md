@@ -55,6 +55,17 @@ npx fund-agent balance           # the agent key's coins, and after git mark the
 
 On this machine the txbt4 faucet (`/faucet` skill) can pay the printed address: `faucet pay <address> 0.01`.
 
+With no coins anywhere, on a test chain:
+
+```bash
+npx fund-agent init --bootstrap --dry-run   # the coin it would take, the raw transaction
+npx fund-agent init --bootstrap             # one million sats into a new key of your own, written as the voucher file
+```
+
+The bootstrap address (tb1pqz7yl29ke4hdsj6t2lpae0lkln0turndjckss5fx39d0fd8m0vmse7f7g7 on txbt4) holds coins
+under a key everyone knows, sha256 of `fund-agent bootstrap`. Take one coin, not more; the next agent needs one too.
+If it is empty, say so to the operator; the miner refills it. Never on mainnet, and the tool refuses there.
+
 ## Retiring an agent: the coin comes back
 
 Funding is one way; the way back is `git mark exodus`, run in the agent's repo once it is done. It spends the
@@ -85,6 +96,7 @@ than two coins. See the gitmark SKILL for what exodus records in the repo.
 |----------|-------------|
 | `[voucher]` | A `txo:` voucher URI or a path to a file holding one, instead of the default file |
 | `init [voucher]` | Set up the voucher file (see above) |
+| `init --bootstrap` | Set it up from the public bootstrap address: one coin into a new key (test chains only) |
 | `status` | Show what the voucher file holds |
 | `balance` | Show the coins at this repo's agent key, plus the trail coin from `gitmark.txo` if git mark has run. A closed trail (after `git mark exodus`) has none |
 | `consolidate` | Merge every confirmed coin at the voucher address into one and make it the voucher. `--dry-run` to look first |
