@@ -424,3 +424,59 @@ test('bootstrap: one coin whole into a fresh key, signed by the public key, file
     fs.rmSync(dir, { recursive: true });
   }
 });
+
+test('bootstrap can take the coin into a key given to it, the waiting key already in the file', async () => {
+  const { bootstrap, BOOTSTRAP_COIN, bootstrapFaucet, canAdoptForBootstrap, createFaucet, parseFaucet, getPubkey } = await import('../index.js');
+  const { parseTransaction } = await import('../lib/unified.js');
+  const { p2trScript } = await import('../lib/tx.js');
+  const from = bootstrapFaucet('txbt4');
+  const rows = [{ txid: 'aa'.repeat(32), vout: 0, value: BOOTSTRAP_COIN, status: { confirmed: true } }];
+  const fetch = async (url, init = {}) => url.endsWith(`/address/${from.address}/utxo`) ? { ok: true, json: async () => rows } : { ok: true, status: 200, text: async () => 'ee'.repeat(32) };
+  const r = await bootstrap({ chain: 'txbt4', fetch, privateKey: key });
+  assert.equal(r.voucher.privateKey, key);
+  const tx = parseTransaction(Uint8Array.from(Buffer.from(r.hex, 'hex')));
+  assert.equal(Buffer.from(tx.outputs[0].script).toString('hex'), Buffer.from(p2trScript(getPubkey(key))).toString('hex'));
+  const waiting = parseFaucet(createFaucet({ chain: 'txbt4', privateKey: key }).uri);
+  assert.equal(canAdoptForBootstrap(waiting, []), true);
+  assert.equal(canAdoptForBootstrap(waiting, [{ value: 1 }]), false);
+  assert.equal(canAdoptForBootstrap(parseFaucet(`txo:txbt4:${txid}:0?amount=5&key=${key}`), []), false);
+});
+
+test('latestVersion asks the registry once and never throws; isNewer compares x.y.z', async () => {
+  const { latestVersion, isNewer, VERSION } = await import('../index.js');
+  const seen = [];
+  assert.equal(await latestVersion({ fetch: async (u) => { seen.push(u); return { ok: true, json: async () => ({ version: '0.0.9' }) }; } }), '0.0.9');
+  assert.deepEqual(seen, ['https://registry.npmjs.org/fund-agent/latest']);
+  assert.equal(await latestVersion({ fetch: async () => { throw new Error('offline'); } }), null);
+  assert.equal(await latestVersion({ fetch: async () => ({ ok: false }) }), null);
+  assert.equal(await latestVersion({ fetch: async () => ({ ok: true, json: async () => ({ version: 'nope' }) }) }), null);
+  assert.equal(isNewer('0.0.8', '0.0.9'), true);
+  assert.equal(isNewer('0.0.9', '0.0.9'), false);
+  assert.equal(isNewer('0.0.10', '0.0.9'), false);
+  assert.equal(isNewer('0.0.9', '0.1.0'), true);
+  assert.equal(isNewer(VERSION, null), false);
+});
+
+test('init --dry-run writes nothing, with or without a voucher argument', async () => {
+  const { spawnSync } = await import('node:child_process');
+  const fs = await import('node:fs');
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fund-agent-'));
+  try {
+    const file = path.join(dir, 'faucet.txt');
+    const bin = new URL('../bin/fund-agent.js', import.meta.url).pathname;
+    const env = { ...process.env, FUND_AGENT_FAUCET: file, FUND_AGENT_NO_UPDATE_CHECK: '1' };
+    const a = spawnSync(process.execPath, [bin, 'init', '--dry-run'], { env, encoding: 'utf8' });
+    assert.equal(a.status, 0, a.stderr);
+    assert.match(a.stdout, /--dry-run: would write a new txbt4 voucher key/);
+    assert.equal(fs.existsSync(file), false);
+    const b = spawnSync(process.execPath, [bin, 'init', `txo:txbt4:${txid}:0?amount=5000&key=${key}`, '--dry-run'], { env, encoding: 'utf8' });
+    assert.equal(b.status, 0, b.stderr);
+    assert.match(b.stdout, /would store this voucher/);
+    assert.doesNotMatch(b.stdout, new RegExp(key));                 // the key is never echoed
+    assert.equal(fs.existsSync(file), false);
+  } finally {
+    fs.rmSync(dir, { recursive: true });
+  }
+});

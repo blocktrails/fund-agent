@@ -15,6 +15,7 @@ import {
   VERSION, CHAINS, DEFAULT_CHAIN, DEFAULT_FAUCET, INIT_AMOUNT, MIN_FEE,
   isGitRepo, resolveKey, resolveVoucher, parseFaucet, createFaucet, refreshVoucher, lookupUtxos, saveVoucher,
   planFunding, agentsFrom, fund, chainInfo, gitConfig, getPubkey, balanceOf, trailTxo, lookupOutput, explorerUrl, consolidate, bootstrap,
+  canAdoptForBootstrap, latestVersion, isNewer,
 } from '../index.js';
 import fs from 'fs';
 import path from 'path';
@@ -99,25 +100,37 @@ function waitingNotice(voucher, utxos) {
 }
 
 async function init() {
+  let adopt = null;   // a waiting, empty key already in the file: the bootstrap coin goes to it
   if (fs.existsSync(DEFAULT_FAUCET) && fs.readFileSync(DEFAULT_FAUCET, 'utf8').trim()) {
     const cur = parseFaucet(fs.readFileSync(DEFAULT_FAUCET, 'utf8'));
-    if (!force) {
+    if (useBootstrap && !cur.funded && !force) {
+      let utxos = [];
+      try { utxos = await lookupUtxos(cur.chain, cur.address); } catch (e) { die(`Explorer lookup failed: ${e.message}`); }
+      if (!canAdoptForBootstrap(cur, utxos)) {
+        console.log(`${DEFAULT_FAUCET} holds a key with coins on the way; nothing to bootstrap:`);
+        describe(cur);
+        console.log('\nRun: npx fund-agent status');
+        return;
+      }
+      if (cur.chain !== (chainFlag || DEFAULT_CHAIN)) die(`The key in ${DEFAULT_FAUCET} is for ${cur.chain}; pass --chain ${cur.chain} or --force`);
+      adopt = cur.privateKey;
+    } else if (!force) {
       console.log(`${DEFAULT_FAUCET} already holds a voucher${cur.funded ? '' : ' key'}:`);
       describe(cur);
       console.log('\nTo replace it (the old key is lost): re-run init with --force');
       return;
     }
   }
-  fs.mkdirSync(path.dirname(DEFAULT_FAUCET), { recursive: true });
+  if (!dryRun) fs.mkdirSync(path.dirname(DEFAULT_FAUCET), { recursive: true });
   let voucher;
   if (useBootstrap) {
     const chain = chainFlag || DEFAULT_CHAIN;
     let r;
-    try { r = await bootstrap({ chain, voucherFile: dryRun ? null : DEFAULT_FAUCET, dryRun }); } catch (e) { die(e.message); }
+    try { r = await bootstrap({ chain, voucherFile: dryRun ? null : DEFAULT_FAUCET, dryRun, ...(adopt ? { privateKey: adopt } : {}) }); } catch (e) { die(e.message); }
     console.log(`Bootstrap: ${r.from.address} (${chain}, public key, anyone may take a coin)`);
     console.log(`Taking:    ${r.coin.value.toLocaleString()} sats  txo:${chain}:${r.coin.txid}:${r.coin.vout}`);
     console.log(`Fee:       ${MIN_FEE.toLocaleString()} sats`);
-    console.log(`Yours:     ${r.amount.toLocaleString()} sats, to a new key`);
+    console.log(`Yours:     ${r.amount.toLocaleString()} sats, to ${adopt ? `the key already in ${DEFAULT_FAUCET}` : 'a new key'}`);
     if (dryRun) { console.log(`\nRaw: ${r.hex}`); console.log('\n--dry-run: Transaction not broadcast, no file written.'); return; }
     console.log(`\nTransaction broadcast: ${r.txid}`);
     console.log(`Explorer: ${explorerUrl(chain, r.txid)}`);
@@ -132,10 +145,16 @@ async function init() {
     if (!isUri && !fs.existsSync(voucherArg)) die(`Invalid voucher: must be a txo: URI or a path to a file (${voucherArg})`);
     const raw = (isUri ? voucherArg : fs.readFileSync(voucherArg, 'utf8')).trim();
     voucher = parseFaucet(raw);
+    if (dryRun) { console.log(`--dry-run: would store this voucher in ${DEFAULT_FAUCET}; nothing written.`); describe(voucher); return; }
     saveVoucher(voucher.uri, DEFAULT_FAUCET);
     fs.chmodSync(DEFAULT_FAUCET, 0o600);
     console.log(`Voucher stored in ${DEFAULT_FAUCET}`);
     describe(voucher);
+    return;
+  }
+  if (dryRun) {
+    console.log(`--dry-run: would write a new ${chainFlag || DEFAULT_CHAIN} voucher key to ${DEFAULT_FAUCET} and print its address; nothing written.`);
+    console.log('Without --dry-run, send coins to the printed address, or use --bootstrap on a test chain.');
     return;
   }
   voucher = createFaucet({ chain: chainFlag || DEFAULT_CHAIN });
@@ -210,6 +229,11 @@ async function consolidateCmd() {
 
 async function main() {
   console.log(`=== fund-agent v${VERSION} ===\n`);
+  // One small registry lookup on init and status: npx keeps old copies around, and an agent cannot tell
+  if ((command === 'init' || command === 'status') && !process.env.FUND_AGENT_NO_UPDATE_CHECK) {
+    const latest = await latestVersion();
+    if (isNewer(VERSION, latest)) console.log(`Note: fund-agent ${latest} is out and you are running ${VERSION}. Use: npx fund-agent@latest\n`);
+  }
   if (command === 'init') return init();
   if (command === 'status') return status();
   if (command === 'balance') return balance();

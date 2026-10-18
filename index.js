@@ -489,20 +489,60 @@ export async function buildBootstrapTx({ chain: chainId, coin, privateKey }) {
 /**
  * Start a faucet of your own from the public bootstrap address: take one coin into a fresh key
  * and write that key, with its coin, as the voucher file.
- * @param {{chain?: string, voucherFile?: string|null, dryRun?: boolean, fetch?: typeof fetch, random?: () => number}} options
+ * @param {{chain?: string, voucherFile?: string|null, dryRun?: boolean, fetch?: typeof fetch, random?: () => number, privateKey?: string}} options - privateKey: take the coin into this key instead of a fresh one (a waiting, empty voucher key)
  * @returns {Promise<{txid: string|null, hex: string, coin: object, amount: number, voucher: object|null, from: object}>}
  */
-export async function bootstrap({ chain = DEFAULT_CHAIN, voucherFile = null, dryRun = false, fetch: f = globalThis.fetch, random } = {}) {
+export async function bootstrap({ chain = DEFAULT_CHAIN, voucherFile = null, dryRun = false, fetch: f = globalThis.fetch, random, privateKey = generatePrivateKey() } = {}) {
   const from = bootstrapFaucet(chain);
   const utxos = await lookupUtxos(chain, from.address, { fetch: f });
   const coin = planBootstrap(utxos, { random });
-  const privateKey = generatePrivateKey();
   const { hex, amount } = await buildBootstrapTx({ chain, coin, privateKey });
   if (dryRun) return { txid: null, hex, coin, amount, voucher: null, from };
   const txid = await broadcast(hex, chain, { fetch: f });
   const uri = createVoucher({ chain, txid, vout: 0, privateKey, amount });
   if (voucherFile) saveVoucher(uri, voucherFile);
   return { txid, hex, coin, amount, voucher: parseFaucet(uri), from };
+}
+
+/**
+ * A waiting voucher key with nothing at its address can receive the bootstrap coin itself,
+ * instead of being replaced: nothing is lost and no --force is needed.
+ * @param {{funded: boolean}} voucher - parsed with parseFaucet
+ * @param {object[]} utxos - what sits at its address
+ * @returns {boolean}
+ */
+export function canAdoptForBootstrap(voucher, utxos) {
+  return !voucher.funded && utxos.length === 0;
+}
+
+/**
+ * The newest fund-agent on npm, or null when the registry cannot be reached quickly.
+ * One small request; never throws.
+ * @param {{fetch?: typeof fetch, timeoutMs?: number}} [options]
+ * @returns {Promise<string|null>}
+ */
+export async function latestVersion({ fetch: f = globalThis.fetch, timeoutMs = 2500 } = {}) {
+  try {
+    const res = await f('https://registry.npmjs.org/fund-agent/latest', { headers: { accept: 'application/json' }, signal: AbortSignal.timeout(timeoutMs) });
+    if (!res.ok) return null;
+    const v = (await res.json()).version;
+    return typeof v === 'string' && /^\d+\.\d+\.\d+/.test(v) ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * True when `latest` is a higher x.y.z than `current`
+ * @param {string} current
+ * @param {string|null} latest
+ * @returns {boolean}
+ */
+export function isNewer(current, latest) {
+  if (!latest) return false;
+  const a = current.split(/[.-]/).map(Number), b = latest.split(/[.-]/).map(Number);
+  for (let i = 0; i < 3; i++) { if ((b[i] || 0) !== (a[i] || 0)) return (b[i] || 0) > (a[i] || 0); }
+  return false;
 }
 
 /**
