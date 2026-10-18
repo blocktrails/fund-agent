@@ -56,7 +56,7 @@ Options:
   --global       Store key in global git config (default: local)
   --force        Discard the existing key and generate + fund a new one
   --no-fund      Generate the key only, do not look for a voucher
-  --dry-run      Show transaction plan without broadcasting
+  --dry-run      Show transaction plan without broadcasting (--dry works too)
   --bootstrap    With init: take one coin from the public bootstrap address into a new key of your own
 
 Chains:
@@ -73,7 +73,7 @@ if (args.includes('--version') || args.includes('-v')) {
 const flag = (name) => { const i = args.indexOf(name); return i >= 0 && args[i + 1] && !args[i + 1].startsWith('-') ? args[i + 1] : null; };
 const useGlobal = args.includes('--global');
 const force = args.includes('--force');
-const dryRun = args.includes('--dry-run');
+const dryRun = args.includes('--dry-run') || args.includes('--dry');   // --dry as git mark spells it
 const noFund = args.includes('--no-fund');
 const useBootstrap = args.includes('--bootstrap');
 const chainFlag = flag('--chain');
@@ -253,7 +253,7 @@ async function main() {
       return;
     }
     if (v) {
-      if (v.file === DEFAULT_FAUCET) console.log(`Using default faucet: ${DEFAULT_FAUCET}`);
+      if (v.file === DEFAULT_FAUCET) console.log(`Using ${process.env.FUND_AGENT_FAUCET ? 'faucet file (FUND_AGENT_FAUCET)' : 'default faucet'}: ${DEFAULT_FAUCET}`);
       const r = await refreshVoucher(v);
       voucher = r.voucher;
       if (!voucher.funded) {
