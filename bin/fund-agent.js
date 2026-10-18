@@ -14,7 +14,7 @@
 import {
   VERSION, CHAINS, DEFAULT_CHAIN, DEFAULT_FAUCET, INIT_AMOUNT, MIN_FEE,
   isGitRepo, resolveKey, resolveVoucher, parseFaucet, createFaucet, refreshVoucher, lookupUtxos, saveVoucher,
-  planFunding, agentsFrom, fund, chainInfo, gitConfig, getPubkey, balanceOf, trailTxo, lookupOutput,
+  planFunding, agentsFrom, fund, chainInfo, gitConfig, getPubkey, balanceOf, trailTxo, lookupOutput, explorerUrl, consolidate,
 } from '../index.js';
 import fs from 'fs';
 import path from 'path';
@@ -30,6 +30,7 @@ Usage:
   npx fund-agent init [voucher]           set up the voucher file
   npx fund-agent status                   what the voucher file holds
   npx fund-agent balance                  what this repo's agent key holds
+  npx fund-agent consolidate [--dry-run]  merge every coin at the voucher address into one
 
 The voucher file: ${DEFAULT_FAUCET}
   (override with FUND_AGENT_FAUCET=<path>)
@@ -73,7 +74,7 @@ const dryRun = args.includes('--dry-run');
 const noFund = args.includes('--no-fund');
 const chainFlag = flag('--chain');
 const positional = args.filter((a, i) => !a.startsWith('-') && args[i - 1] !== '--chain');
-const command = ['init', 'status', 'balance'].includes(positional[0]) ? positional.shift() : 'fund';
+const command = ['init', 'status', 'balance', 'consolidate'].includes(positional[0]) ? positional.shift() : 'fund';
 const voucherArg = positional[0];
 
 function die(msg) { console.error(`Error: ${msg}`); process.exit(1); }
@@ -163,11 +164,36 @@ async function balance() {
   }
 }
 
+async function consolidateCmd() {
+  const v = resolveVoucher(voucherArg);
+  if (!v) die(`No voucher file at ${DEFAULT_FAUCET}. Run: npx fund-agent init`);
+  const { voucher } = await refreshVoucher(v);
+  console.log(`File:    ${v.file || '(argument)'}`);
+  console.log(`Chain:   ${voucher.chain} (${chainInfo(voucher.chain).name})`);
+  console.log(`Address: ${voucher.address}`);
+  let r;
+  try {
+    r = await consolidate({ voucher, voucherFile: v.file, dryRun });
+  } catch (e) { die(e.message); }
+  const { plan } = r;
+  console.log(`\nMerging ${plan.inputs.length} coins:`);
+  for (const u of plan.inputs) console.log(`  ${u.value.toLocaleString().padStart(12)} sats  txo:${voucher.chain}:${u.txid}:${u.vout}`);
+  console.log(`  Total:  ${plan.total.toLocaleString()} sats`);
+  console.log(`  Fee:    ${plan.fee.toLocaleString()} sats`);
+  console.log(`  Output: ${plan.amount.toLocaleString()} sats back to the voucher address`);
+  if (dryRun) { console.log(`\nRaw: ${r.hex}`); console.log('\n--dry-run: Transaction not broadcast.'); return; }
+  console.log(`\nTransaction broadcast: ${r.txid}`);
+  console.log(`Explorer: ${explorerUrl(voucher.chain, r.txid)}`);
+  if (v.file) console.log(`Voucher file updated: ${v.file}`);
+  else console.log(`Voucher: ${r.newVoucher.replace(/key=[0-9a-f]+/, 'key=…')}`);
+}
+
 async function main() {
   console.log(`=== fund-agent v${VERSION} ===\n`);
   if (command === 'init') return init();
   if (command === 'status') return status();
   if (command === 'balance') return balance();
+  if (command === 'consolidate') return consolidateCmd();
 
   if (!useGlobal && !isGitRepo()) die('Not in a git repository. Use --global for global config.');
 
