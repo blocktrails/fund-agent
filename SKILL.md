@@ -49,7 +49,7 @@ npx fund-agent status            # chain, address, balance, how many agents it s
 After funding, in the agent's repo:
 
 ```bash
-npx fund-agent balance           # the agent key's address, its coins as txo: URIs, and the total
+npx fund-agent balance           # the agent key's coins, and after git mark the trail's current coin
 ```
 
 On this machine the txbt4 faucet (`/faucet` skill) can pay the printed address: `faucet pay <address> 0.01`.
@@ -61,7 +61,7 @@ On this machine the txbt4 faucet (`/faucet` skill) can pay the printed address: 
 | `[voucher]` | A `txo:` voucher URI or a path to a file holding one, instead of the default file |
 | `init [voucher]` | Set up the voucher file (see above) |
 | `status` | Show what the voucher file holds |
-| `balance` | Show the coins at this repo's agent key (chain from git config `gitmark.network`) |
+| `balance` | Show the coins at this repo's agent key, plus the trail coin from `gitmark.txo` if git mark has run |
 | `--chain <id>` | Chain for a new voucher key (`init`), or the chain to look on (`balance`) |
 | `--global` | Store the agent key in global git config |
 | `--force` | Replace the existing agent key with a new one (the old key is lost) |

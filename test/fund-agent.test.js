@@ -200,6 +200,30 @@ test('balanceOf lists a key\'s coins, confirmed first, with totals', async () =>
   assert.equal(b.total, 14000);
 });
 
+test('parseTxo reads the URI git mark keeps in gitmark.txo', async () => {
+  const { parseTxo } = await import('../index.js');
+  const t = parseTxo(`txo:txbt4:${txid}:0?amount=9700&commit=de04775b6ade67b91caf15013ba73dad5f1b4b67`);
+  assert.deepEqual(t, { chain: 'txbt4', txid, vout: 0, amount: 9700, commit: 'de04775b6ade67b91caf15013ba73dad5f1b4b67' });
+  assert.deepEqual(parseTxo(`txo:btc:${txid}:3`), { chain: 'btc', txid, vout: 3, amount: null, commit: null });
+  assert.throws(() => parseTxo('txo:txbt4:abc:0'), /Invalid txo/);
+});
+
+test('lookupOutput reports where the trail coin sits and whether it is spent', async () => {
+  const { lookupOutput } = await import('../index.js');
+  const seen = [];
+  const fetch = async (url) => {
+    seen.push(url);
+    if (url.endsWith('/outspend/0')) return { ok: true, json: async () => ({ spent: false }) };
+    return { ok: true, json: async () => ({ status: { confirmed: false }, vout: [{ value: 9700, scriptpubkey_address: 'tb1ptrail' }] }) };
+  };
+  const o = await lookupOutput('txbt4', { txid, vout: 0 }, { fetch });
+  assert.deepEqual(o, { address: 'tb1ptrail', amount: 9700, confirmed: false, spent: false });
+  assert.ok(seen.some((u) => u === `https://mempool.guide/testnet4/api/tx/${txid}`));
+  assert.ok(seen.some((u) => u === `https://mempool.guide/testnet4/api/tx/${txid}/outspend/0`));
+  const spent = async (url) => url.endsWith('/outspend/0') ? { ok: true, json: async () => ({ spent: true }) } : { ok: true, json: async () => ({ status: { confirmed: true }, vout: [{ value: 9700, scriptpubkey_address: 'tb1ptrail' }] }) };
+  assert.equal((await lookupOutput('txbt4', { txid, vout: 0 }, { fetch: spent })).spent, true);
+});
+
 test('balance refuses without an agent key in git config', async () => {
   const { execFileSync, spawnSync } = await import('node:child_process');
   const fs = await import('node:fs');

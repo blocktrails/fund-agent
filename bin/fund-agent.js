@@ -14,7 +14,7 @@
 import {
   VERSION, CHAINS, DEFAULT_CHAIN, DEFAULT_FAUCET, INIT_AMOUNT, MIN_FEE,
   isGitRepo, resolveKey, resolveVoucher, parseFaucet, createFaucet, refreshVoucher, lookupUtxos, saveVoucher,
-  planFunding, agentsFrom, fund, chainInfo, gitConfig, getPubkey, balanceOf,
+  planFunding, agentsFrom, fund, chainInfo, gitConfig, getPubkey, balanceOf, trailTxo, lookupOutput,
 } from '../index.js';
 import fs from 'fs';
 import path from 'path';
@@ -148,6 +148,19 @@ async function balance() {
   }
   if (!b.utxos.length) console.log('  no coins');
   console.log(`Balance: ${b.total.toLocaleString()} sats${b.pending ? ` (${b.pending.toLocaleString()} unconfirmed)` : ''}`);
+
+  // After git mark, the coin lives at the trail's current address, not the base one
+  const t = trailTxo();
+  if (!t) return;
+  if (t.chain !== chain) { console.log(`\nTrail:   coin on ${t.chain}, not ${chain} (git config gitmark.txo)`); return; }
+  try {
+    const o = await lookupOutput(chain, t);
+    const uri = `txo:${chain}:${t.txid}:${t.vout}`;
+    if (o.spent) console.log(`\nTrail:   ${uri} is spent; run git mark info`);
+    else console.log(`\nTrail:   ${o.address}\n  ${o.amount.toLocaleString().padStart(12)} sats  ${uri}${o.confirmed ? '' : '  (unconfirmed)'}${t.commit ? `  commit ${t.commit.slice(0, 8)}` : ''}`);
+  } catch (e) {
+    console.log(`\nTrail:   txo:${chain}:${t.txid}:${t.vout} (explorer: ${e.message})`);
+  }
 }
 
 async function main() {

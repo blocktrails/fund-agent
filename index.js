@@ -270,6 +270,48 @@ export async function balanceOf(chainId, pubkey, options = {}) {
 }
 
 /**
+ * Parse a plain txo: URI with no key, as git mark keeps in git config gitmark.txo
+ * @param {string} uri - txo:<chain>:<txid>:<vout>[?amount=<sats>&commit=<hash>]
+ * @returns {{chain: string, txid: string, vout: number, amount: number|null, commit: string|null}}
+ */
+export function parseTxo(uri) {
+  const m = uri.trim().match(/^txo:([a-z0-9]+):([0-9a-fA-F]{64}):(\d+)(?:\?(.*))?$/);
+  if (!m) throw new Error('Invalid txo: URI: expected txo:<chain>:<txid>:<vout>');
+  const params = Object.fromEntries((m[4] || '').split('&').filter(Boolean).map((p) => p.split('=')));
+  return { chain: m[1], txid: m[2].toLowerCase(), vout: parseInt(m[3], 10), amount: params.amount ? parseInt(params.amount, 10) : null, commit: params.commit || null };
+}
+
+/**
+ * The trail's current coin, as git mark left it in git config gitmark.txo (local, then global)
+ * @returns {ReturnType<typeof parseTxo>|null}
+ */
+export function trailTxo() {
+  const uri = gitConfig('gitmark.txo') || gitConfig('gitmark.txo', null, true);
+  return uri ? parseTxo(uri) : null;
+}
+
+/**
+ * Look one output up on the chain's explorer: where it sits, what it holds, whether it is spent
+ * @param {string} chainId
+ * @param {{txid: string, vout: number}} outpoint
+ * @param {{fetch?: typeof fetch}} [options]
+ * @returns {Promise<{address: string, amount: number, confirmed: boolean, spent: boolean}>}
+ */
+export async function lookupOutput(chainId, { txid, vout }, { fetch: f = globalThis.fetch } = {}) {
+  const api = chainInfo(chainId).api;
+  const [txRes, spendRes] = await Promise.all([
+    f(`${api}/tx/${txid}`, { headers: { accept: 'application/json' } }),
+    f(`${api}/tx/${txid}/outspend/${vout}`, { headers: { accept: 'application/json' } }),
+  ]);
+  if (!txRes.ok) throw new Error(`Explorer lookup failed: ${txRes.status} ${api}/tx/${txid}`);
+  const tx = await txRes.json();
+  const out = tx.vout && tx.vout[vout];
+  if (!out) throw new Error(`Output ${vout} not found in ${txid}`);
+  const spend = spendRes.ok ? await spendRes.json() : { spent: false };
+  return { address: out.scriptpubkey_address, amount: Number(out.value), confirmed: !!(tx.status && tx.status.confirmed), spent: !!spend.spent };
+}
+
+/**
  * Turn a waiting voucher into a funded one if coins have arrived: the largest
  * UTXO at its address (confirmed first) becomes the outpoint, and the file,
  * if any, is rewritten. A funded voucher is returned as is.
