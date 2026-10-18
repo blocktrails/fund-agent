@@ -216,7 +216,7 @@ async function consolidateCmd() {
   } catch (e) { die(e.message); }
   const { plan } = r;
   console.log(`\nMerging ${plan.inputs.length} coins:`);
-  for (const u of plan.inputs) console.log(`  ${u.value.toLocaleString().padStart(12)} sats  txo:${voucher.chain}:${u.txid}:${u.vout}`);
+  for (const u of plan.inputs) console.log(`  ${u.value.toLocaleString().padStart(12)} sats  txo:${voucher.chain}:${u.txid}:${u.vout}${u.confirmed ? '' : '  (unconfirmed)'}`);
   console.log(`  Total:  ${plan.total.toLocaleString()} sats`);
   console.log(`  Fee:    ${plan.fee.toLocaleString()} sats`);
   console.log(`  Output: ${plan.amount.toLocaleString()} sats back to the voucher address`);

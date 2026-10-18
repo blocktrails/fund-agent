@@ -82,15 +82,15 @@ git mark exodus <that address>             # send it
 ```
 
 The returned coin lands as a separate UTXO at the voucher address, which the voucher file does not know about.
-Merge it back into the pool once it has confirmed:
+Merge it back into the pool, no need to wait for a block:
 
 ```bash
 npx fund-agent consolidate --dry-run    # the coins it would merge, the fee, the raw transaction
 npx fund-agent consolidate              # one coin at the voucher address; the file now points at it
 ```
 
-It refuses while any coin at the address is unconfirmed, so it never races a funding in flight, and with fewer
-than two coins. See the gitmark SKILL for what exodus records in the repo.
+Unconfirmed coins are merged too; it refuses only with fewer than two coins. Do not run it while a funding is in
+flight on another machine, since both would spend the voucher coin. See the gitmark SKILL for what exodus records in the repo.
 
 ## Arguments
 
@@ -101,7 +101,7 @@ than two coins. See the gitmark SKILL for what exodus records in the repo.
 | `init --bootstrap` | Set it up from the public bootstrap address: one coin into a new key (test chains only) |
 | `status` | Show what the voucher file holds |
 | `balance` | Show the coins at this repo's agent key, plus the trail coin from `gitmark.txo` if git mark has run. A closed trail (after `git mark exodus`) has none |
-| `consolidate` | Merge every confirmed coin at the voucher address into one and make it the voucher. `--dry-run` to look first |
+| `consolidate` | Merge every coin at the voucher address into one and make it the voucher. `--dry-run` to look first |
 | `--chain <id>` | Chain for a new voucher key (`init`), or the chain to look on (`balance`) |
 | `--global` | Store the agent key in global git config |
 | `--force` | Replace the existing agent key with a new one (the old key is lost) |

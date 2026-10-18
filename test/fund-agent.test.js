@@ -275,7 +275,9 @@ test('planConsolidation: confirmed coins only, at least two, unified chains, wor
   assert.equal(p.fee, consolidationFee(2));
   assert.equal(p.fee, MIN_FEE + 100);
   assert.equal(p.amount, 865800 - MIN_FEE - 100);
-  assert.throws(() => planConsolidation('txbt4', [a, { ...b, confirmed: false }]), /unconfirmed coin/);
+  const withPending = planConsolidation('txbt4', [a, { ...b, confirmed: false }]);
+  assert.equal(withPending.inputs.length, 2);                      // unconfirmed coins are merged too
+  assert.equal(withPending.pending, 1);
   assert.throws(() => planConsolidation('txbt4', [b]), /nothing to merge/);
   assert.throws(() => planConsolidation('txbt4', []), /No coins/);
   assert.throws(() => planConsolidation('tbtc4', [a, b]), /not supported yet/);
@@ -343,7 +345,7 @@ test('consolidate: looks the address up, dry run posts nothing, a real run posts
     assert.equal(real.newVoucher, `txo:txbt4:${'ee'.repeat(32)}:0?amount=${865800 - MIN_FEE - 100}&key=${key}`);
     assert.equal(loadVoucher(file), real.newVoucher);
     rows[0].status.confirmed = false;
-    await assert.rejects(consolidate({ voucher, voucherFile: file, fetch }), /unconfirmed/);
+    assert.equal((await consolidate({ voucher, voucherFile: file, dryRun: true, fetch })).plan.pending, 1);
   } finally {
     fs.rmSync(dir, { recursive: true });
   }

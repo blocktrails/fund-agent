@@ -555,24 +555,23 @@ export function consolidationFee(n) {
 }
 
 /**
- * Plan merging every confirmed coin at the voucher address into one.
- * Refuses while anything there is unconfirmed (a funding may be in flight) and when there is nothing to merge.
+ * Plan merging every coin at the voucher address into one, unconfirmed ones included: the chains
+ * accept a spend of an unconfirmed coin, as funding already relies on. Refuses when there is nothing to merge.
  * @param {string} chainId
  * @param {{txid: string, vout: number, value: number, confirmed: boolean}[]} utxos
- * @returns {{chain: object, inputs: object[], total: number, fee: number, amount: number}}
+ * @returns {{chain: object, inputs: object[], total: number, fee: number, amount: number, pending: number}}
  */
 export function planConsolidation(chainId, utxos) {
   const chain = chainInfo(chainId);
   if (chain.sighash !== 'unified') throw new Error(`consolidate signs the unified sighash; ${chainId} is not supported yet`);
-  const pending = utxos.filter((u) => !u.confirmed);
-  if (pending.length) throw new Error(`${pending.length} unconfirmed coin${pending.length === 1 ? '' : 's'} at the voucher address; wait for a block and run again`);
+  const pending = utxos.filter((u) => !u.confirmed).length;
   const inputs = [...utxos].sort((a, b) => b.value - a.value);
   if (inputs.length < 2) throw new Error(inputs.length ? 'One coin at the voucher address; nothing to merge' : 'No coins at the voucher address');
   const total = inputs.reduce((a, u) => a + u.value, 0);
   const fee = consolidationFee(inputs.length);
   const amount = total - fee;
   if (amount < INIT_AMOUNT) throw new Error(`Merged coin would be ${amount} sats, under ${INIT_AMOUNT}; not worth the fee`);
-  return { chain, inputs, total, fee, amount };
+  return { chain, inputs, total, fee, amount, pending };
 }
 
 /**
@@ -596,7 +595,8 @@ export async function buildConsolidationTx({ voucher, utxos }) {
 /**
  * Merge every coin at the voucher address into one, and make that coin the voucher.
  * Returned coins from retired agents (git mark exodus) land at the address as separate UTXOs
- * that nothing else spends; this is how they rejoin the pool.
+ * that nothing else spends; this is how they rejoin the pool. Do not run it while a funding is in flight
+ * on another machine: both would spend the voucher coin.
  * @param {{voucher: {chain: string, privateKey: string, address: string}, voucherFile?: string|null, dryRun?: boolean, fetch?: typeof fetch}} options
  * @returns {Promise<{txid: string|null, hex: string, plan: object, newVoucher: string|null}>}
  */
