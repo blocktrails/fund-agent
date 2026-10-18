@@ -54,6 +54,22 @@ npx fund-agent balance           # the agent key's coins, and after git mark the
 
 On this machine the txbt4 faucet (`/faucet` skill) can pay the printed address: `faucet pay <address> 0.01`.
 
+## Retiring an agent: the coin comes back
+
+Funding is one way; the way back is `git mark exodus`, run in the agent's repo once it is done. It spends the
+trail's whole balance, less the 300 sat fee, to one address and closes the trail, leaving no UTXO at the agent's
+addresses. Give it the voucher key's address, which `npx fund-agent status` prints:
+
+```bash
+npx fund-agent status                      # Address: tb1p… (the funder)
+cd <agent repo>
+git mark exodus <that address> --dry       # read the transaction first
+git mark exodus <that address>             # send it
+```
+
+The returned coin lands as a separate UTXO at the voucher address; the voucher file still points at its own
+coin and is not changed. See the gitmark SKILL for what exodus records in the repo.
+
 ## Arguments
 
 | Argument | Description |
@@ -61,7 +77,7 @@ On this machine the txbt4 faucet (`/faucet` skill) can pay the printed address: 
 | `[voucher]` | A `txo:` voucher URI or a path to a file holding one, instead of the default file |
 | `init [voucher]` | Set up the voucher file (see above) |
 | `status` | Show what the voucher file holds |
-| `balance` | Show the coins at this repo's agent key, plus the trail coin from `gitmark.txo` if git mark has run |
+| `balance` | Show the coins at this repo's agent key, plus the trail coin from `gitmark.txo` if git mark has run. A closed trail (after `git mark exodus`) has none |
 | `--chain <id>` | Chain for a new voucher key (`init`), or the chain to look on (`balance`) |
 | `--global` | Store the agent key in global git config |
 | `--force` | Replace the existing agent key with a new one (the old key is lost) |
@@ -124,3 +140,4 @@ Voucher file updated: /home/you/.gitmark/faucet.txt
 - [fund-agent](https://github.com/blocktrails/fund-agent)
 - [bitcoin-kernel utxo page](https://bitcoin-kernel.com/utxo/), which opens any `txo:` coin
 - [create-agent](https://init-agent.com/SKILL.md), which makes the key this tool funds
+- [gitmark](https://github.com/solidpayorg/gitmark/blob/gh-pages/SKILL.md), which spends the coin per commit and returns it with exodus
