@@ -47,6 +47,10 @@ everyone knows: `npx fund-agent init --bootstrap` takes one coin from it, one mi
 of your own and writes that as your voucher file. The key is sha256 of the text `fund-agent bootstrap`,
 so it is no secret and anyone can empty the address; on a chain worth nothing that is the point.
 txbt4 address: `tb1pqz7yl29ke4hdsj6t2lpae0lkln0turndjckss5fx39d0fd8m0vmse7f7g7`. Refused on mainnet chains.
+If the voucher file already holds a key that is waiting with nothing at its address, the coin goes into that key;
+`--force` is only for replacing a funded one. `init --dry-run` writes nothing on any path. `init` and `status` say
+when a newer fund-agent is on npm, because `npx fund-agent` can run a cached old copy; `FUND_AGENT_NO_UPDATE_CHECK=1`
+skips that lookup.
 `FUND_AGENT_FAUCET=<path>` moves the file.
 
 ### CLI
@@ -183,10 +187,15 @@ Returns `{ chain, address, utxos, confirmed, pending, total }` for a key: its co
 The trail coin git mark keeps in git config `gitmark.txo`, the plain `txo:` parser it needs, and one output looked up
 on the explorer: `{ address, amount, confirmed, spent }`.
 
-### `bootstrap({ chain, voucherFile, dryRun, fetch, random })`, `bootstrapFaucet(chain)`, `planBootstrap(utxos)`, `BOOTSTRAP_KEY`, `BOOTSTRAP_COIN`
+### `bootstrap({ chain, voucherFile, dryRun, fetch, random, privateKey })`, `bootstrapFaucet(chain)`, `planBootstrap(utxos)`, `BOOTSTRAP_KEY`, `BOOTSTRAP_COIN`
 
 One confirmed coin at the public bootstrap address, picked at random, spent whole (less 1,000 sats) to a fresh key that
 becomes the voucher file. `BOOTSTRAP_COIN` (1,001,000 sats) is what a loader puts in each coin. Mainnet chains throw.
+
+### `latestVersion({ fetch, timeoutMs })`, `isNewer(current, latest)`, `canAdoptForBootstrap(voucher, utxos)`
+
+The newest version on npm or null, never throwing; an x.y.z comparison; and whether a voucher key is waiting with nothing
+at its address, so a bootstrap can land in it.
 
 ### `consolidate({ voucher, voucherFile, dryRun, fetch })`, `planConsolidation(chain, utxos)`, `buildConsolidationTx({ voucher, utxos })`
 

@@ -65,6 +65,8 @@ npx fund-agent init --bootstrap             # one million sats into a new key of
 The bootstrap address (tb1pqz7yl29ke4hdsj6t2lpae0lkln0turndjckss5fx39d0fd8m0vmse7f7g7 on txbt4) holds coins
 under a key everyone knows, sha256 of `fund-agent bootstrap`. Take one coin, not more; the next agent needs one too.
 If it is empty, say so to the operator; the miner refills it. Never on mainnet, and the tool refuses there.
+If the voucher file already holds a key with nothing at its address, the coin goes into that key; no `--force`, nothing
+lost. Always run `npx fund-agent@latest`: `npx` keeps old copies, and `init`/`status` print a note when you are behind.
 
 ## Retiring an agent: the coin comes back
 
