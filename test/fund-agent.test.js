@@ -348,3 +348,79 @@ test('consolidate: looks the address up, dry run posts nothing, a real run posts
     fs.rmSync(dir, { recursive: true });
   }
 });
+
+test('bootstrap key is sha256("fund-agent bootstrap"), public on purpose, refused on mainnet chains', async () => {
+  const { BOOTSTRAP_KEY, bootstrapFaucet, addressOf, getPubkey } = await import('../index.js');
+  const { createHash } = await import('node:crypto');
+  assert.equal(BOOTSTRAP_KEY, createHash('sha256').update('fund-agent bootstrap').digest('hex'));
+  const f = bootstrapFaucet('txbt4');
+  assert.equal(f.privateKey, BOOTSTRAP_KEY);
+  assert.equal(f.address, addressOf('txbt4', getPubkey(BOOTSTRAP_KEY)));
+  assert.equal(f.funded, false);
+  assert.throws(() => bootstrapFaucet('btc'), /No bootstrap on btc/);
+  assert.throws(() => bootstrapFaucet('xbt'), /No bootstrap on xbt/);
+});
+
+test('planBootstrap takes one confirmed coin at random, and says why when there is none', async () => {
+  const { planBootstrap, BOOTSTRAP_COIN } = await import('../index.js');
+  const coins = [0, 1, 2].map((i) => ({ txid: `${i}${i}`.repeat(32), vout: i, value: BOOTSTRAP_COIN, confirmed: true }));
+  assert.equal(planBootstrap(coins, { random: () => 0 }).vout, 0);
+  assert.equal(planBootstrap(coins, { random: () => 0.5 }).vout, 1);
+  assert.equal(planBootstrap(coins, { random: () => 0.99 }).vout, 2);
+  assert.equal(planBootstrap([...coins, { txid: 'ee'.repeat(32), vout: 9, value: 500, confirmed: true }], { random: () => 0.99 }).vout, 2); // dust skipped
+  assert.throws(() => planBootstrap([{ ...coins[0], confirmed: false }]), /1 unconfirmed coin/);
+  assert.throws(() => planBootstrap([]), /empty/);
+});
+
+test('bootstrap: one coin whole into a fresh key, signed by the public key, file written; dry run writes nothing', async () => {
+  const { bootstrap, BOOTSTRAP_COIN, BOOTSTRAP_KEY, bootstrapFaucet, loadVoucher, parseFaucet, getPubkey } = await import('../index.js');
+  const { unifiedSighash, parseTransaction, SCRIPT_TYPE_TAPROOT } = await import('../lib/unified.js');
+  const { p2trScript, HASH_TYPE } = await import('../lib/tx.js');
+  const { schnorr } = await import('@noble/curves/secp256k1');
+  const fs = await import('node:fs');
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const unhex = (s) => Uint8Array.from(Buffer.from(s, 'hex'));
+  const hex = (b) => Buffer.from(b).toString('hex');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fund-agent-'));
+  try {
+    const file = path.join(dir, 'faucet.txt');
+    const from = bootstrapFaucet('txbt4');
+    const rows = [{ txid: 'aa'.repeat(32), vout: 2, value: BOOTSTRAP_COIN, status: { confirmed: true } }];
+    const calls = [];
+    const fetch = async (url, init = {}) => {
+      calls.push(`${init.method || 'GET'} ${url}`);
+      if (url.endsWith(`/address/${from.address}/utxo`)) return { ok: true, json: async () => rows };
+      if (init.method === 'POST') return { ok: true, status: 200, text: async () => 'ee'.repeat(32) };
+      return { ok: false, status: 404, text: async () => 'not stubbed' };
+    };
+    const dry = await bootstrap({ chain: 'txbt4', voucherFile: file, dryRun: true, fetch });
+    assert.equal(dry.txid, null);
+    assert.equal(fs.existsSync(file), false);
+    assert.equal(calls.filter((c) => c.startsWith('POST')).length, 0);
+    const r = await bootstrap({ chain: 'txbt4', voucherFile: file, fetch });
+    assert.equal(r.txid, 'ee'.repeat(32));
+    assert.equal(r.amount, BOOTSTRAP_COIN - MIN_FEE);
+    assert.equal(calls.filter((c) => c.startsWith('POST')).length, 1);
+    const v = parseFaucet(loadVoucher(file));
+    assert.notEqual(v.privateKey, BOOTSTRAP_KEY);                   // a key of your own
+    assert.equal(v.amount, BOOTSTRAP_COIN - MIN_FEE);
+    assert.equal(v.txid, 'ee'.repeat(32));
+    assert.equal(v.vout, 0);
+    const tx = parseTransaction(unhex(r.hex));
+    assert.equal(tx.inputs.length, 1);
+    assert.equal(hex(Uint8Array.from(tx.inputs[0].txid).reverse()), 'aa'.repeat(32));
+    assert.equal(tx.inputs[0].vout, 2);
+    assert.equal(tx.outputs.length, 1);                              // whole coin, no change
+    assert.equal(hex(tx.outputs[0].script), hex(p2trScript(getPubkey(v.privateKey))));
+    const w = tx.inputs[0].witness[0];
+    assert.equal(w[64], HASH_TYPE);
+    const msg = unifiedSighash(tx, 0, HASH_TYPE, SCRIPT_TYPE_TAPROOT, [{ value: BigInt(BOOTSTRAP_COIN), script: p2trScript(from.publicKey) }]);
+    assert.ok(schnorr.verify(w.slice(0, 64), msg, unhex(from.publicKey)));
+    rows[0].status.confirmed = false;
+    await assert.rejects(bootstrap({ chain: 'txbt4', fetch }), /unconfirmed/);
+    await assert.rejects(bootstrap({ chain: 'btc', fetch }), /No bootstrap/);
+  } finally {
+    fs.rmSync(dir, { recursive: true });
+  }
+});

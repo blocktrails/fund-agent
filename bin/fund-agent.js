@@ -14,7 +14,7 @@
 import {
   VERSION, CHAINS, DEFAULT_CHAIN, DEFAULT_FAUCET, INIT_AMOUNT, MIN_FEE,
   isGitRepo, resolveKey, resolveVoucher, parseFaucet, createFaucet, refreshVoucher, lookupUtxos, saveVoucher,
-  planFunding, agentsFrom, fund, chainInfo, gitConfig, getPubkey, balanceOf, trailTxo, lookupOutput, explorerUrl, consolidate,
+  planFunding, agentsFrom, fund, chainInfo, gitConfig, getPubkey, balanceOf, trailTxo, lookupOutput, explorerUrl, consolidate, bootstrap,
 } from '../index.js';
 import fs from 'fs';
 import path from 'path';
@@ -28,6 +28,7 @@ fund-agent v${VERSION} - Initialize git config nostr.privkey with funds
 Usage:
   npx fund-agent [options] [voucher]      fund this repo's agent
   npx fund-agent init [voucher]           set up the voucher file
+  npx fund-agent init --bootstrap         start it from the public bootstrap address (test chains)
   npx fund-agent status                   what the voucher file holds
   npx fund-agent balance                  what this repo's agent key holds
   npx fund-agent consolidate [--dry-run]  merge every coin at the voucher address into one
@@ -55,6 +56,7 @@ Options:
   --force        Discard the existing key and generate + fund a new one
   --no-fund      Generate the key only, do not look for a voucher
   --dry-run      Show transaction plan without broadcasting
+  --bootstrap    With init: take one coin from the public bootstrap address into a new key of your own
 
 Chains:
 ${Object.entries(CHAINS).map(([id, c]) => `  ${id.padEnd(8)} ${c.name}${c.sighash === 'unified' ? ' (unified sighash)' : ''}`).join('\n')}
@@ -72,6 +74,7 @@ const useGlobal = args.includes('--global');
 const force = args.includes('--force');
 const dryRun = args.includes('--dry-run');
 const noFund = args.includes('--no-fund');
+const useBootstrap = args.includes('--bootstrap');
 const chainFlag = flag('--chain');
 const positional = args.filter((a, i) => !a.startsWith('-') && args[i - 1] !== '--chain');
 const command = ['init', 'status', 'balance', 'consolidate'].includes(positional[0]) ? positional.shift() : 'fund';
@@ -107,6 +110,23 @@ async function init() {
   }
   fs.mkdirSync(path.dirname(DEFAULT_FAUCET), { recursive: true });
   let voucher;
+  if (useBootstrap) {
+    const chain = chainFlag || DEFAULT_CHAIN;
+    let r;
+    try { r = await bootstrap({ chain, voucherFile: dryRun ? null : DEFAULT_FAUCET, dryRun }); } catch (e) { die(e.message); }
+    console.log(`Bootstrap: ${r.from.address} (${chain}, public key, anyone may take a coin)`);
+    console.log(`Taking:    ${r.coin.value.toLocaleString()} sats  txo:${chain}:${r.coin.txid}:${r.coin.vout}`);
+    console.log(`Fee:       ${MIN_FEE.toLocaleString()} sats`);
+    console.log(`Yours:     ${r.amount.toLocaleString()} sats, to a new key`);
+    if (dryRun) { console.log(`\nRaw: ${r.hex}`); console.log('\n--dry-run: Transaction not broadcast, no file written.'); return; }
+    console.log(`\nTransaction broadcast: ${r.txid}`);
+    console.log(`Explorer: ${explorerUrl(chain, r.txid)}`);
+    fs.chmodSync(DEFAULT_FAUCET, 0o600);
+    console.log(`Voucher written to ${DEFAULT_FAUCET}`);
+    describe(r.voucher);
+    console.log('Then, in any repo: npx fund-agent');
+    return;
+  }
   if (voucherArg) {
     const isUri = voucherArg.startsWith('txo:') || voucherArg.startsWith('urn:voucher:');
     if (!isUri && !fs.existsSync(voucherArg)) die(`Invalid voucher: must be a txo: URI or a path to a file (${voucherArg})`);

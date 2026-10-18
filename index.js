@@ -432,6 +432,80 @@ export async function buildFundingTx({ publicKey, voucher }) {
 }
 
 /**
+ * The bootstrap key: sha256 of the text "fund-agent bootstrap", a private key everyone knows.
+ * Coins sent to its address on a test chain are there for anyone to take, one coin per
+ * `fund-agent init --bootstrap`, to start a faucet of their own. Refused on mainnet chains.
+ */
+export const BOOTSTRAP_KEY = crypto.createHash('sha256').update('fund-agent bootstrap').digest('hex');
+export const BOOTSTRAP_COIN = 1001000;   // what the loader puts in each coin: one million sats plus the taker's fee
+
+/**
+ * The public bootstrap faucet for a test chain
+ * @param {string} chainId
+ * @returns {ReturnType<typeof createFaucet>}
+ */
+export function bootstrapFaucet(chainId) {
+  const chain = chainInfo(chainId);
+  if (chain.network === 'mainnet') throw new Error(`No bootstrap on ${chainId}: the key is public, and ${chain.name} coins are worth something`);
+  return createFaucet({ chain: chainId, privateKey: BOOTSTRAP_KEY });
+}
+
+/**
+ * Pick the coin to take: one confirmed coin at random, so two takers at once rarely collide.
+ * @param {{txid: string, vout: number, value: number, confirmed: boolean}[]} utxos
+ * @param {{random?: () => number}} [options]
+ * @returns {{txid: string, vout: number, value: number, confirmed: boolean}}
+ */
+export function planBootstrap(utxos, { random = Math.random } = {}) {
+  const usable = utxos.filter((u) => u.confirmed && u.value > INIT_AMOUNT + MIN_FEE);
+  if (!usable.length) {
+    const pending = utxos.filter((u) => !u.confirmed).length;
+    throw new Error(pending ? `The bootstrap address has ${pending} unconfirmed coin${pending === 1 ? '' : 's'}; wait for a block` : 'The bootstrap address is empty; nothing to take');
+  }
+  return usable[Math.floor(random() * usable.length) % usable.length];
+}
+
+/**
+ * Spend one bootstrap coin whole to a fresh key, less MIN_FEE
+ * @param {{chain: string, coin: {txid: string, vout: number, value: number}, privateKey: string}} options - privateKey is the new owner's
+ * @returns {Promise<{hex: string, txid: string, amount: number}>}
+ */
+export async function buildBootstrapTx({ chain: chainId, coin, privateKey }) {
+  const chain = chainInfo(chainId);
+  const from = bootstrapFaucet(chainId);
+  const amount = coin.value - MIN_FEE;
+  const input = { privateKey: from.privateKey, publicKey: from.publicKey, txid: coin.txid, vout: coin.vout, inputAmount: coin.value, outputs: [{ pubkey: getPubkey(privateKey), amount }] };
+  let built;
+  if (chain.sighash === 'unified') {
+    const { buildUnifiedTx } = await import('./lib/tx.js');
+    built = buildUnifiedTx(input);
+  } else {
+    const { buildTx } = await import('btctx');
+    built = await buildTx({ ...input, network: chain.network });
+  }
+  return { hex: built.hex, txid: built.txid, amount };
+}
+
+/**
+ * Start a faucet of your own from the public bootstrap address: take one coin into a fresh key
+ * and write that key, with its coin, as the voucher file.
+ * @param {{chain?: string, voucherFile?: string|null, dryRun?: boolean, fetch?: typeof fetch, random?: () => number}} options
+ * @returns {Promise<{txid: string|null, hex: string, coin: object, amount: number, voucher: object|null, from: object}>}
+ */
+export async function bootstrap({ chain = DEFAULT_CHAIN, voucherFile = null, dryRun = false, fetch: f = globalThis.fetch, random } = {}) {
+  const from = bootstrapFaucet(chain);
+  const utxos = await lookupUtxos(chain, from.address, { fetch: f });
+  const coin = planBootstrap(utxos, { random });
+  const privateKey = generatePrivateKey();
+  const { hex, amount } = await buildBootstrapTx({ chain, coin, privateKey });
+  if (dryRun) return { txid: null, hex, coin, amount, voucher: null, from };
+  const txid = await broadcast(hex, chain, { fetch: f });
+  const uri = createVoucher({ chain, txid, vout: 0, privateKey, amount });
+  if (voucherFile) saveVoucher(uri, voucherFile);
+  return { txid, hex, coin, amount, voucher: parseFaucet(uri), from };
+}
+
+/**
  * Fee for a spend with n taproot inputs and one output: MIN_FEE plus 100 sats per extra input
  * @param {number} n
  * @returns {number}
