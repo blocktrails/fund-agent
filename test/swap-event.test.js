@@ -80,10 +80,10 @@ test('subscribe sends one REQ per relay with the filter, hands events to onEvent
 
 test('without a WebSocket (Node before 22) publish reports every relay as failed with the reason and subscribe says so once', async () => {
   const ev = buildSwapRequest({ privateKey: sk, poolPubkey: poolPub, chain: 'txbt4', txid, vout: 0, to: 'tbtc4', amount: 8000, createdAt: 1 });
-  const r = await publish(ev, ['wss://a', 'wss://b'], { WebSocket: undefined });
+  const r = await publish(ev, ['wss://a', 'wss://b'], { WebSocket: null });
   assert.deepEqual(r, [{ relay: 'wss://a', ok: false, message: NO_WEBSOCKET }, { relay: 'wss://b', ok: false, message: NO_WEBSOCKET }]);
   const lines = [];
-  const s = subscribe({ relays: ['wss://a'], filter: {}, onEvent: () => {}, log: (l) => lines.push(l), WebSocket: undefined });
+  const s = subscribe({ relays: ['wss://a'], filter: {}, onEvent: () => {}, log: (l) => lines.push(l), WebSocket: null });
   assert.deepEqual(lines, [NO_WEBSOCKET]);
   s.close();
 });
