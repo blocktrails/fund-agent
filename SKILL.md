@@ -72,13 +72,12 @@ lost. Always run `npx fund-agent@latest`: `npx` keeps old copies, and `init`/`st
 
 Funding is one way; the way back is `git mark exodus`, run in the agent's repo once it is done. It spends the
 trail's whole balance, less the 300 sat fee, to one address and closes the trail, leaving no UTXO at the agent's
-addresses. Give it the voucher key's address, which `npx fund-agent status` prints:
+addresses. With no address it goes back to the address that funded the trail, which is the voucher's:
 
 ```bash
-npx fund-agent status                      # Address: tb1p… (the funder)
 cd <agent repo>
-git mark exodus <that address> --dry       # read the transaction first
-git mark exodus <that address>             # send it
+git mark exodus --dry                      # read the transaction first
+git mark exodus                            # send it home
 ```
 
 The returned coin lands as a separate UTXO at the voucher address, which the voucher file does not know about.
