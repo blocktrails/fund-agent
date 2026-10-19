@@ -245,7 +245,7 @@ Example:
 txo:tbtc4:abc123def456:0?amount=5000000&key=0123456789abcdef...
 ```
 
-### `planSwaps`, `poolPass`, `buildPayment`, `existsOn`, `senderOf` (lib/pool.js), `poolSnapshot`, `renderPage`, `serveUi` (lib/pool-ui.js)
+### `planSwaps`, `poolPass`, `buildPayment`, `senderOf` (lib/pool.js), `poolSnapshot`, `renderPage`, `serveUi` (lib/pool-ui.js)
 
 The swap pool: the planner is pure (`planSwaps({ chain, incoming, poolAddress, state, limits, now })` returns payouts,
 refusals and the per-key daily count), `poolPass` does one round over both chains, and the UI module renders the
