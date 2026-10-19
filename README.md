@@ -68,7 +68,8 @@ To run a pool: `npx swap-pool --key-file ~/.gitmark/swap-pool.txt --chains txbt4
 polls both sides, pays what arrives, and serves a page with a Swap tab (which shows the command to
 run) and a Pool tab (reserves, ledger, refusals) plus `/pool.json`. Defaults: fee 1,000 sats, cap
 1,000,000 per swap, 10 swaps per key per day; `--reserve addr,addr` names top-up addresses that are
-never paid back; `--once` and `--dry-run` for a look. The pool never pays from a coin that also
+never paid back; `--once` and `--dry-run` for a look; `--on-change '<command>'` runs a command after any pass that
+paid or refused something, the ledger's publish script say, and the next pass waits for it. The pool never pays from a coin that also
 exists on the other chain, and a deposit that is itself a replay is paid once, so the two sides can
 never be made to pay twice.
 

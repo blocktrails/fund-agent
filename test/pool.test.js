@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { xonlyOfAddress, otherChain, planSwaps, pickCoin, buildPayment, poolPass } from '../lib/pool.js';
+import { xonlyOfAddress, otherChain, planSwaps, pickCoin, buildPayment, poolPass, runHook } from '../lib/pool.js';
 import { addressOf, getPubkey, MIN_FEE } from '../index.js';
 
 const key = 'ab'.repeat(32);
@@ -124,4 +124,17 @@ test('the pool page renders reserves, swaps and the swap command from a snapshot
   assert.match(html, /data-tab="swap"/);
   assert.match(html, /You receive/);
   assert.match(html, /id="flip"/);
+});
+
+test('runHook runs a shell command, logs its lines, reports failure without throwing', async () => {
+  const lines = [];
+  const ok = await runHook('echo one; echo two 1>&2', { log: (l) => lines.push(l) });
+  assert.equal(ok.ok, true);
+  assert.deepEqual(lines, ['hook: one', 'hook: two']);
+  const bad = await runHook('echo nope; exit 3', { log: (l) => lines.push(l) });
+  assert.equal(bad.ok, false);
+  assert.equal(bad.code, 3);
+  assert.ok(lines.includes('hook: exit 3'));
+  const slow = await runHook('sleep 5', { log: () => {}, timeoutMs: 200 });
+  assert.equal(slow.ok, false);
 });

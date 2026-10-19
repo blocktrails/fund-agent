@@ -5,7 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { parseFaucet, loadVoucher, addressOf, getPubkey, chainInfo } from '../index.js';
-import { poolPass } from '../lib/pool.js';
+import { poolPass, runHook } from '../lib/pool.js';
 import { poolSnapshot, serveUi } from '../lib/pool-ui.js';
 
 const args = process.argv.slice(2);
@@ -18,11 +18,13 @@ const poll = Number(flag('--poll', 30));
 const once = args.includes('--once');
 const dryRun = args.includes('--dry-run') || args.includes('--dry');
 const uiPort = flag('--ui', null);
+const onChange = flag('--on-change', null);
 const log = (s) => console.log(`${new Date().toISOString().slice(11, 19)} ${s}`);
 
 if (args.includes('--help') || args.includes('-h')) {
-  console.log(`Usage: swap-pool [--key-file ~/.gitmark/swap-pool.txt] [--chains txbt4,tbtc4] [--fee 1000] [--max 1000000] [--per-day 10] [--state file] [--poll 30] [--once] [--dry-run] [--reserve addr,addr] [--ui 3480]
-Whoever sends to the pool's address on one chain is paid the same amount, less the fee, at the same address on the other.`);
+  console.log(`Usage: swap-pool [--key-file ~/.gitmark/swap-pool.txt] [--chains txbt4,tbtc4] [--fee 1000] [--max 1000000] [--per-day 10] [--state file] [--poll 30] [--once] [--dry-run] [--reserve addr,addr] [--ui 3480] [--on-change '<command>']
+Whoever sends to the pool's address on one chain is paid the same amount, less the fee, at the same address on the other.
+--on-change runs a command after any pass that paid or refused something (the ledger's publish script, say); the next pass waits for it.`);
   process.exit(0);
 }
 if (chains.length !== 2) { console.error('--chains needs exactly two chain ids'); process.exit(1); }
@@ -40,11 +42,16 @@ const uiCache = {};
 if (uiPort) serveUi({ port: Number(uiPort), snapshot: () => poolSnapshot({ publicKey, chains, limits, state, cache: uiCache }), log });
 
 async function pass() {
+  let r;
   try {
-    const r = await poolPass({ privateKey, chains, limits, state, dryRun, log });
+    r = await poolPass({ privateKey, chains, limits, state, dryRun, log });
     if (!dryRun) save();
-    return r;
   } catch (e) { log(`pass failed: ${e.message}`); return null; }
+  if (onChange && !dryRun && r && (r.paid.length || r.refused.length)) {
+    log(`change: ${r.paid.length} paid, ${r.refused.length} refused; running: ${onChange}`);
+    await runHook(onChange, { log });
+  }
+  return r;
 }
 if (once) { await pass(); process.exit(0); }
 for (;;) { await pass(); await new Promise((r) => setTimeout(r, poll * 1000)); }
