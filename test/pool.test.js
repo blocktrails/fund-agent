@@ -138,3 +138,41 @@ test('runHook runs a shell command, logs its lines, reports failure without thro
   const slow = await runHook('sleep 5', { log: () => {}, timeoutMs: 200 });
   assert.equal(slow.ok, false);
 });
+
+test('a deposit that exists on both chains waits for a request, then is paid from the chain the request names', async () => {
+  const { schnorr } = await import('@noble/curves/secp256k1');
+  const { bytesToHex } = await import('@noble/hashes/utils');
+  const { addressOf, getPubkey } = await import('../index.js');
+  const privateKey = bytesToHex(schnorr.utils.randomPrivateKey());
+  const pool = addressOf('txbt4', getPubkey(privateKey));
+  const senderKey = bytesToHex(schnorr.utils.randomPrivateKey());
+  const sender = addressOf('tbtc4', getPubkey(senderKey));
+  const dep = 'ab'.repeat(32);
+  const poolCoin = { txid: 'cd'.repeat(32), vout: 0, value: 50000, confirmed: true };
+  const calls = [];
+  // the same deposit sits at the pool address on both chains; the pool's coin exists on txbt4 only
+  const fetch = async (url) => {
+    calls.push(url);
+    const json = (v, status = 200) => ({ ok: status === 200, status, json: async () => v, text: async () => JSON.stringify(v) });
+    if (url.endsWith(`/address/${pool}/utxo`)) return json([{ txid: dep, vout: 0, value: 5000, status: { confirmed: false } }, ...(url.includes('mempool.guide') ? [{ ...poolCoin, status: { confirmed: true } }] : [])]);
+    if (url.endsWith(`/tx/${dep}`)) return json({ txid: dep, vin: [{ prevout: { scriptpubkey_address: sender } }], vout: [{ value: 5000 }] });
+    if (url.endsWith(`/tx/${poolCoin.txid}`)) return json(url.includes('mempool.guide') ? { txid: poolCoin.txid, vout: [{ value: 50000 }] } : { error: 'not found' }, url.includes('mempool.guide') ? 200 : 404);
+    if (url.endsWith('/tx') ) return { ok: true, status: 200, text: async () => 'ef'.repeat(32), json: async () => ({}) };
+    return json({ error: 'unexpected ' + url }, 404);
+  };
+  const limits = { fee: 1000, max: 1000000, perDay: 10, reserve: [] };
+  // no request: held on both chains, nothing paid, nothing recorded
+  const state1 = {};
+  const r1 = await poolPass({ privateKey, chains: ['txbt4', 'tbtc4'], limits, state: state1, dryRun: true, fetch });
+  assert.equal(r1.paid.length, 0);
+  assert.equal(r1.held.length, 2);
+  assert.ok(!state1.paid || !Object.keys(state1.paid).length);
+  // a request saying the deposit was meant on tbtc4: paid once, from the tbtc4 side, to txbt4; the txbt4 copy is a replay
+  const state2 = {};
+  const r2 = await poolPass({ privateKey, chains: ['txbt4', 'tbtc4'], limits, state: state2, dryRun: true, fetch, requests: { [`${dep}:0`]: { chain: 'tbtc4', to: 'txbt4' } } });
+  assert.equal(r2.held.length, 0);
+  assert.equal(r2.paid.length, 1);
+  assert.equal(r2.paid[0].from, 'tbtc4');
+  assert.equal(r2.paid[0].to, 'txbt4');
+  assert.ok(state2.replayed[`txbt4:${dep}:0`], 'the txbt4 copy is marked as the replay');
+});
