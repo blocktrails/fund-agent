@@ -280,7 +280,7 @@ test('planConsolidation: confirmed coins only, at least two, unified chains, wor
   assert.equal(withPending.pending, 1);
   assert.throws(() => planConsolidation('txbt4', [b]), /nothing to merge/);
   assert.throws(() => planConsolidation('txbt4', []), /No coins/);
-  assert.throws(() => planConsolidation('tbtc4', [a, b]), /not supported yet/);
+  assert.equal(planConsolidation('tbtc4', [a, b]).chain.sighash, 'bip341');     // Core-signed chains consolidate too
   assert.throws(() => planConsolidation('txbt4', [{ ...a, value: 5000 }, { ...b, value: 5000 }]), /not worth the fee/);
 });
 
@@ -481,4 +481,26 @@ test('init --dry-run writes nothing, with or without a voucher argument', async 
   } finally {
     fs.rmSync(dir, { recursive: true });
   }
+});
+
+test('buildConsolidationTx on tbtc4 signs every input BIP341 and verifies, one output back to the key', async () => {
+  const { buildConsolidationTx, getPubkey, twinChainOf, existsOnChain } = await import('../index.js');
+  const { parseTransaction } = await import('../lib/unified.js');
+  const utxos = [
+    { txid: 'aa'.repeat(32), vout: 0, value: 8800, confirmed: true },
+    { txid: 'bb'.repeat(32), vout: 1, value: 857000, confirmed: true },
+    { txid: 'cc'.repeat(32), vout: 3, value: 9400, confirmed: true },
+  ];
+  const r = await buildConsolidationTx({ voucher: { chain: 'tbtc4', privateKey: key }, utxos });
+  const tx = parseTransaction(Uint8Array.from(Buffer.from(r.hex, 'hex')));
+  assert.equal(tx.inputs.length, 3);
+  assert.equal(tx.outputs.length, 1);
+  assert.equal(tx.outputs[0].value, BigInt(r.plan.amount));
+  for (const i of tx.inputs) assert.equal(i.witness[0].length, 64);            // SIGHASH_DEFAULT: no hash type byte
+  assert.match(r.txid, /^[0-9a-f]{64}$/);
+  assert.equal(twinChainOf('tbtc4'), 'txbt4');
+  assert.equal(twinChainOf('signet'), null);
+  assert.equal(await existsOnChain('txbt4', 'ab'.repeat(32), { fetch: async () => ({ ok: false, status: 404 }) }), false);
+  assert.equal(await existsOnChain('txbt4', 'ab'.repeat(32), { fetch: async () => ({ ok: true, status: 200 }) }), true);
+  assert.equal(await existsOnChain('txbt4', 'ab'.repeat(32), { fetch: async () => { throw new Error('down'); } }), null);
 });

@@ -546,6 +546,27 @@ export function isNewer(current, latest) {
 }
 
 /**
+ * The chain that shares history with this one: a BIP341 spend on a Core-signed chain is valid on its BLAKE2b
+ * twin whenever all of its inputs exist there. Null for chains with no twin.
+ */
+export function twinChainOf(chainId) {
+  return { tbtc4: 'txbt4', txbt4: 'tbtc4', btc: 'xbt', xbt: 'btc' }[chainId] || null;
+}
+
+/**
+ * Does a chain's explorer know a transaction? /tx/:txid is 404 for one the chain never saw.
+ * @returns {Promise<boolean|null>} null when it could not tell
+ */
+export async function existsOnChain(chainId, txid, { fetch: f = globalThis.fetch } = {}) {
+  try {
+    const res = await f(`${chainInfo(chainId).api}/tx/${txid}`, { headers: { accept: 'application/json' } });
+    if (res.status === 404) return false;
+    if (res.ok) return true;
+  } catch { /* unknown */ }
+  return null;
+}
+
+/**
  * Fee for a spend with n taproot inputs and one output: MIN_FEE plus 100 sats per extra input
  * @param {number} n
  * @returns {number}
@@ -563,7 +584,6 @@ export function consolidationFee(n) {
  */
 export function planConsolidation(chainId, utxos) {
   const chain = chainInfo(chainId);
-  if (chain.sighash !== 'unified') throw new Error(`consolidate signs the unified sighash; ${chainId} is not supported yet`);
   const pending = utxos.filter((u) => !u.confirmed).length;
   const inputs = [...utxos].sort((a, b) => b.value - a.value);
   if (inputs.length < 2) throw new Error(inputs.length ? 'One coin at the voucher address; nothing to merge' : 'No coins at the voucher address');
@@ -582,13 +602,20 @@ export function planConsolidation(chainId, utxos) {
 export async function buildConsolidationTx({ voucher, utxos }) {
   const plan = planConsolidation(voucher.chain, utxos);
   const publicKey = getPubkey(voucher.privateKey);
-  const { buildUnifiedTx } = await import('./lib/tx.js');
-  const built = buildUnifiedTx({
+  const args = {
     privateKey: voucher.privateKey,
     publicKey,
     inputs: plan.inputs.map((u) => ({ txid: u.txid, vout: u.vout, amount: u.value })),
     outputs: [{ pubkey: publicKey, amount: plan.amount }],
-  });
+  };
+  let built;
+  if (plan.chain.sighash === 'unified') {
+    const { buildUnifiedTx } = await import('./lib/tx.js');
+    built = buildUnifiedTx(args);
+  } else {
+    const { buildTaprootTx } = await import('./lib/tx-bip341.js');
+    built = await buildTaprootTx(args);
+  }
   return { hex: built.hex, txid: built.txid, plan };
 }
 

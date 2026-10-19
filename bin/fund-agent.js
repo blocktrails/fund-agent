@@ -14,7 +14,7 @@
 import {
   VERSION, CHAINS, DEFAULT_CHAIN, DEFAULT_FAUCET, INIT_AMOUNT, MIN_FEE,
   isGitRepo, resolveKey, resolveVoucher, parseFaucet, createFaucet, refreshVoucher, lookupUtxos, saveVoucher,
-  planFunding, agentsFrom, fund, chainInfo, gitConfig, getPubkey, balanceOf, trailTxo, lookupOutput, explorerUrl, consolidate, bootstrap,
+  planFunding, agentsFrom, fund, chainInfo, gitConfig, getPubkey, balanceOf, trailTxo, lookupOutput, explorerUrl, consolidate, bootstrap, twinChainOf, existsOnChain,
   canAdoptForBootstrap, latestVersion, isNewer,
 } from '../index.js';
 import fs from 'fs';
@@ -210,17 +210,30 @@ async function consolidateCmd() {
   console.log(`File:    ${v.file || '(argument)'}`);
   console.log(`Chain:   ${voucher.chain} (${chainInfo(voucher.chain).name})`);
   console.log(`Address: ${voucher.address}`);
-  let r;
-  try {
-    r = await consolidate({ voucher, voucherFile: v.file, dryRun });
-  } catch (e) { die(e.message); }
-  const { plan } = r;
+  // Plan first, broadcast nothing: the replay check must come before the spend, not after it
+  let planned;
+  try { planned = await consolidate({ voucher, voucherFile: v.file, dryRun: true }); } catch (e) { die(e.message); }
+  const { plan } = planned;
   console.log(`\nMerging ${plan.inputs.length} coins:`);
   for (const u of plan.inputs) console.log(`  ${u.value.toLocaleString().padStart(12)} sats  txo:${voucher.chain}:${u.txid}:${u.vout}${u.confirmed ? '' : '  (unconfirmed)'}`);
   console.log(`  Total:  ${plan.total.toLocaleString()} sats`);
   console.log(`  Fee:    ${plan.fee.toLocaleString()} sats`);
   console.log(`  Output: ${plan.amount.toLocaleString()} sats back to the voucher address`);
-  if (dryRun) { console.log(`\nRaw: ${r.hex}`); console.log('\n--dry-run: Transaction not broadcast.'); return; }
+  // On a Core-signed chain the spend is valid on the BLAKE2b twin whenever every input exists there too
+  let replayable = false;
+  if (plan.chain.sighash !== 'unified') {
+    const twin = twinChainOf(voucher.chain);
+    if (twin) {
+      const seen = await Promise.all(plan.inputs.map((u) => existsOnChain(twin, u.txid)));
+      if (seen.every((x) => x === true)) { replayable = true; console.log(`  Warning: every input also exists on ${twin}; this BIP341 spend would be valid there too and could be replayed. Include a coin that lives on ${voucher.chain} alone, or spend the ${twin} twins first.`); }
+      else if (seen.some((x) => x === null)) console.log(`  Note: could not check ${twin} for every input; a BIP341 spend replays there if all inputs exist on both chains.`);
+      else console.log(`  Replay: ${seen.filter((x) => x === false).length} of ${seen.length} inputs live on ${voucher.chain} alone, so this cannot be replayed on ${twin}.`);
+    }
+  }
+  if (dryRun) { console.log(`\nRaw: ${planned.hex}`); console.log('\n--dry-run: Transaction not broadcast.'); return; }
+  if (replayable && !force) die('Not broadcast: every input has a twin on the other chain. Re-run with --force to send it anyway.');
+  let r;
+  try { r = await consolidate({ voucher, voucherFile: v.file }); } catch (e) { die(e.message); }
   console.log(`\nTransaction broadcast: ${r.txid}`);
   console.log(`Explorer: ${explorerUrl(voucher.chain, r.txid)}`);
   if (v.file) console.log(`Voucher file updated: ${v.file}`);
