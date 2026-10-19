@@ -1,6 +1,6 @@
 {
   "name": "fund-agent",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "files": [
     "bin",
     "lib",
