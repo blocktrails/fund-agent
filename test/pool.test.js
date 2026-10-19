@@ -109,3 +109,18 @@ test('poolPass never pays from a coin that also exists on the other chain, and a
   assert.equal(plan.payouts.length, 0);
   assert.ok(state2.replayed['tbtc4:' + '11'.repeat(32) + ':0']);
 });
+
+test('the pool page renders reserves, swaps and the swap command from a snapshot', async () => {
+  const { renderPage } = await import('../lib/pool-ui.js');
+  const html = renderPage({ address: addressOf('txbt4', pub), chains: ['txbt4', 'tbtc4'], limits: { fee: 1000, max: 1000000, perDay: 10 },
+    reserves: { txbt4: { confirmed: 1000000000, pending: 0, coins: 1, name: 'Bitcoin BLAKE2b testnet4' }, tbtc4: { confirmed: 0, pending: 999993000, coins: 1, name: 'Bitcoin testnet4' } },
+    swaps: [{ at: '2026-10-19T10:08:07Z', from: 'txbt4', to: 'tbtc4', value: 5000, amount: 4000, sender: addressOf('txbt4', other), txid: '11'.repeat(32), payoutTxid: '22'.repeat(32) }],
+    refused: [{ at: '2026-10-19T10:09:00Z', chain: 'txbt4', value: 5000000, reason: 'over the cap of 1000000 sats per swap' }], replayed: ['x'], reserveTopUps: 2, at: '2026-10-19T10:10:00.000Z' });
+  assert.match(html, /1,000,000,000/);
+  assert.match(html, /999,993,000/);
+  assert.match(html, new RegExp(`--pool ${addressOf('txbt4', pub)}`));
+  assert.match(html, /txbt4 → tbtc4/);
+  assert.match(html, /over the cap/);
+  assert.match(html, /1 deposit seen on both chains/);
+  assert.doesNotMatch(html, /<script/);
+});

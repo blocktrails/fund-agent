@@ -6,6 +6,7 @@ import path from 'path';
 import os from 'os';
 import { parseFaucet, loadVoucher, addressOf, getPubkey, chainInfo } from '../index.js';
 import { poolPass } from '../lib/pool.js';
+import { poolSnapshot, serveUi } from '../lib/pool-ui.js';
 
 const args = process.argv.slice(2);
 const flag = (n, d) => { const i = args.indexOf(n); return i >= 0 && args[i + 1] ? args[i + 1] : d; };
@@ -16,10 +17,11 @@ const stateFile = flag('--state', path.join(os.homedir(), '.gitmark', 'swap-pool
 const poll = Number(flag('--poll', 30));
 const once = args.includes('--once');
 const dryRun = args.includes('--dry-run') || args.includes('--dry');
+const uiPort = flag('--ui', null);
 const log = (s) => console.log(`${new Date().toISOString().slice(11, 19)} ${s}`);
 
 if (args.includes('--help') || args.includes('-h')) {
-  console.log(`Usage: swap-pool [--key-file ~/.gitmark/swap-pool.txt] [--chains txbt4,tbtc4] [--fee 1000] [--max 1000000] [--per-day 10] [--state file] [--poll 30] [--once] [--dry-run] [--reserve addr,addr]
+  console.log(`Usage: swap-pool [--key-file ~/.gitmark/swap-pool.txt] [--chains txbt4,tbtc4] [--fee 1000] [--max 1000000] [--per-day 10] [--state file] [--poll 30] [--once] [--dry-run] [--reserve addr,addr] [--ui 3480]
 Whoever sends to the pool's address on one chain is paid the same amount, less the fee, at the same address on the other.`);
   process.exit(0);
 }
@@ -33,6 +35,9 @@ const save = () => fs.writeFileSync(stateFile, JSON.stringify(state, null, 2));
 
 log(`pool ${chains.join(' ↔ ')} at ${addressOf(chains[0], publicKey)} (${chainInfo(chains[0]).name} / ${chainInfo(chains[1]).name})`);
 log(`fee ${limits.fee} sats, cap ${limits.max} sats per swap, ${limits.perDay} per key per day${limits.reserve.length ? `, reserve from ${limits.reserve.map((a) => a.slice(0, 14) + '…').join(', ')}` : ''}${dryRun ? ', dry run' : ''}`);
+
+const uiCache = {};
+if (uiPort) serveUi({ port: Number(uiPort), snapshot: () => poolSnapshot({ publicKey, chains, limits, state, cache: uiCache }), log });
 
 async function pass() {
   try {
