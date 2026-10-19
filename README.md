@@ -55,6 +55,23 @@ when a newer fund-agent is on npm, because `npx fund-agent` can run a cached old
 skips that lookup.
 `FUND_AGENT_FAUCET=<path>` moves the file.
 
+### Swapping between chains
+
+A swap pool holds the same key, and so the same address, on two chains. Send coins to that address on
+one chain and the pool pays the same amount, less its fee, to the sending address on the other. One
+to one, no price. `npx fund-agent swap 50000 --to tbtc4 --pool <address>` sends from this repo's
+agent key on its own chain (`gitmark.network`, or `--chain`) and tells you the coin will arrive on
+tbtc4 at the same address, since one key spells one address on both chains. `git config swap.pool
+<address>` saves the pool.
+
+To run a pool: `npx swap-pool --key-file ~/.gitmark/swap-pool.txt --chains txbt4,tbtc4 --ui 3480`
+polls both sides, pays what arrives, and serves a page with a Swap tab (which shows the command to
+run) and a Pool tab (reserves, ledger, refusals) plus `/pool.json`. Defaults: fee 1,000 sats, cap
+1,000,000 per swap, 10 swaps per key per day; `--reserve addr,addr` names top-up addresses that are
+never paid back; `--once` and `--dry-run` for a look. The pool never pays from a coin that also
+exists on the other chain, and a deposit that is itself a replay is paid once, so the two sides can
+never be made to pay twice.
+
 ### CLI
 
 ```bash
@@ -79,6 +96,9 @@ npx fund-agent init --bootstrap
 
 # Merge the returned coins at the voucher address into one (--dry-run to look first)
 npx fund-agent consolidate
+
+# Send 50,000 sats to a swap pool; 49,000 arrives at the same address on tbtc4
+npx fund-agent swap 50000 --to tbtc4 --pool <address>
 
 # Initialize from voucher file
 npx fund-agent /path/to/voucher.txt
@@ -224,6 +244,12 @@ Example:
 ```
 txo:tbtc4:abc123def456:0?amount=5000000&key=0123456789abcdef...
 ```
+
+### `planSwaps`, `poolPass`, `buildPayment`, `senderOf` (lib/pool.js), `poolSnapshot`, `renderPage`, `serveUi` (lib/pool-ui.js)
+
+The swap pool: the planner is pure (`planSwaps({ chain, incoming, poolAddress, state, limits, now })` returns payouts,
+refusals and the per-key daily count), `poolPass` does one round over both chains, and the UI module renders the
+page and serves it.
 
 ## Files Created
 
