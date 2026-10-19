@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { schnorr } from '@noble/curves/secp256k1';
 import { bytesToHex } from '@noble/hashes/utils';
-import { buildSwapRequest, buildSwapReply, verifyEvent, readSwapRequest, publish, subscribe, parseRelays, KIND_SWAP } from '../lib/swap-event.js';
+import { buildSwapRequest, buildSwapReply, verifyEvent, readSwapRequest, publish, subscribe, parseRelays, KIND_SWAP, NO_WEBSOCKET } from '../lib/swap-event.js';
 
 const sk = bytesToHex(schnorr.utils.randomPrivateKey());
 const poolSk = bytesToHex(schnorr.utils.randomPrivateKey());
@@ -76,4 +76,14 @@ test('subscribe sends one REQ per relay with the filter, hands events to onEvent
   assert.deepEqual(got, [[ev.id, 'wss://r1.example']]);
   s.close();
   assert.ok(FakeWS.opened.every((w) => w.closed));
+});
+
+test('without a WebSocket (Node before 22) publish reports every relay as failed with the reason and subscribe says so once', async () => {
+  const ev = buildSwapRequest({ privateKey: sk, poolPubkey: poolPub, chain: 'txbt4', txid, vout: 0, to: 'tbtc4', amount: 8000, createdAt: 1 });
+  const r = await publish(ev, ['wss://a', 'wss://b'], { WebSocket: undefined });
+  assert.deepEqual(r, [{ relay: 'wss://a', ok: false, message: NO_WEBSOCKET }, { relay: 'wss://b', ok: false, message: NO_WEBSOCKET }]);
+  const lines = [];
+  const s = subscribe({ relays: ['wss://a'], filter: {}, onEvent: () => {}, log: (l) => lines.push(l), WebSocket: undefined });
+  assert.deepEqual(lines, [NO_WEBSOCKET]);
+  s.close();
 });

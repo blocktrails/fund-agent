@@ -245,7 +245,7 @@ async function swapCmd() {
   const ev = buildSwapRequest({ privateKey, poolPubkey: poolPub, chain: from, txid: sent, vout: 0, to, amount: sats, hex });
   const results = await publish(ev, list);
   const ok = results.filter((r) => r.ok).length;
-  console.log(`Announced: kind ${ev.kind} ${ev.id.slice(0, 16)}… (${ok}/${results.length} relays)${ok ? '' : '; the pool will find the deposit on its next poll'}`);
+  console.log(`Announced: kind ${ev.kind} ${ev.id.slice(0, 16)}… (${ok}/${results.length} relays)${ok ? '' : `; ${results[0]?.message || 'no relay took it'}; the pool will find the deposit on its next poll`}`);
   console.log(`Check:    npx fund-agent balance --chain ${to}`);
 }
 

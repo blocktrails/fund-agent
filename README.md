@@ -77,7 +77,8 @@ pool's key, `chain`, `to`, `amount`, optionally `tx` with the raw deposit. The p
 (`--relays`, or `--no-nostr`), wakes when a request arrives, and pays on that pass instead of the next poll; it still
 pays only for a coin it finds on the chain, and the return address is still the deposit's first input, never the
 event's key. It answers from its own key with the same `d`: `paid` = payout txid, or `refused` = the reason. A request
-that reaches no relay costs nothing: the poll finds the deposit anyway. The pool never pays from a coin that also
+that reaches no relay costs nothing: the poll finds the deposit anyway. Talking to relays uses Node's own WebSocket, so it
+needs Node 22 or newer; on an older Node the swap command says so and the pool runs as if `--no-nostr` were given. The pool never pays from a coin that also
 exists on the other chain, and a deposit that is itself a replay is paid once, so the two sides can
 never be made to pay twice.
 

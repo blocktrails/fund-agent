@@ -6,7 +6,7 @@ import path from 'path';
 import os from 'os';
 import { parseFaucet, loadVoucher, addressOf, getPubkey, chainInfo } from '../index.js';
 import { poolPass, runHook } from '../lib/pool.js';
-import { subscribe, publish, verifyEvent, readSwapRequest, buildSwapReply, parseRelays, DEFAULT_RELAYS, KIND_SWAP } from '../lib/swap-event.js';
+import { subscribe, publish, verifyEvent, readSwapRequest, buildSwapReply, parseRelays, DEFAULT_RELAYS, KIND_SWAP, hasWebSocket, NO_WEBSOCKET } from '../lib/swap-event.js';
 import { poolSnapshot, serveUi } from '../lib/pool-ui.js';
 
 const args = process.argv.slice(2);
@@ -20,7 +20,8 @@ const once = args.includes('--once');
 const dryRun = args.includes('--dry-run') || args.includes('--dry');
 const uiPort = flag('--ui', null);
 const onChange = flag('--on-change', null);
-const relays = args.includes('--no-nostr') ? [] : (parseRelays(flag('--relays', '')).length ? parseRelays(flag('--relays', '')) : DEFAULT_RELAYS);
+let relays = args.includes('--no-nostr') ? [] : (parseRelays(flag('--relays', '')).length ? parseRelays(flag('--relays', '')) : DEFAULT_RELAYS);
+if (relays.length && !hasWebSocket()) { console.error(`swap requests off: ${NO_WEBSOCKET} (this is ${process.version}); the poll still finds every deposit`); relays = []; }
 const log = (s) => console.log(`${new Date().toISOString().slice(11, 19)} ${s}`);
 
 if (args.includes('--help') || args.includes('-h')) {
