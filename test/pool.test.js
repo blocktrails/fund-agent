@@ -70,6 +70,7 @@ test('poolPass: an arrival on txbt4 is paid on tbtc4 from the pool coin there, r
     if (url.includes('mempool.space') && url.endsWith(`/address/${poolTx}/utxo`)) return { ok: true, json: async () => [{ txid: '22'.repeat(32), vout: 0, value: 400000, status: { confirmed: true } }] };
     if (url.endsWith(`/tx/${'11'.repeat(32)}`)) return { ok: true, json: async () => ({ vin: [{ prevout: { scriptpubkey_address: sender } }] }) };
     if (url.endsWith(`/tx/${'22'.repeat(32)}`)) return { ok: true, json: async () => ({ vin: [{ prevout: { scriptpubkey_address: 'tb1psomeoneelse' } }] }) };
+    if (url.includes('/outspend/')) return { ok: url.includes('mempool.space'), status: url.includes('mempool.space') ? 200 : 404 };   // the pool's tbtc4 coin exists on tbtc4 only
     return { ok: false, status: 404, json: async () => ({}), text: async () => '' };
   };
   const state = {}; const logs = [];
@@ -83,4 +84,28 @@ test('poolPass: an arrival on txbt4 is paid on tbtc4 from the pool coin there, r
   const again = await poolPass({ privateKey: key, chains: ['txbt4', 'tbtc4'], limits: { fee: 1000, max: 1000000, perDay: 10 }, state, log: () => {}, fetch });
   assert.equal(again.paid.length, 0);
   assert.equal(posted.length, 1);
+});
+
+test('poolPass never pays from a coin that also exists on the other chain, and a replayed deposit is not a second swap', async () => {
+  const pool = addressOf('txbt4', pub);
+  const sender = addressOf('txbt4', other);
+  const posted = [];
+  const fetch = async (url, init = {}) => {
+    if (init.method === 'POST') { posted.push(url); return { ok: true, status: 200, text: async () => 'ee'.repeat(32) }; }
+    if (url.endsWith(`/address/${pool}/utxo`)) return { ok: true, json: async () => [{ txid: '11'.repeat(32), vout: 0, value: 50000, status: { confirmed: true } }, { txid: '22'.repeat(32), vout: 0, value: 400000, status: { confirmed: true } }] };  // same coins on both chains: twins
+    if (url.endsWith(`/tx/${'11'.repeat(32)}`)) return { ok: true, json: async () => ({ vin: [{ prevout: { scriptpubkey_address: sender } }] }) };
+    if (url.endsWith(`/tx/${'22'.repeat(32)}`)) return { ok: true, json: async () => ({ vin: [{ prevout: { scriptpubkey_address: 'tb1pelse' } }] }) };
+    if (url.includes('/outspend/')) return { ok: true, status: 200 };            // every outpoint exists on both chains
+    return { ok: false, status: 404, json: async () => ({}), text: async () => '' };
+  };
+  const state = {}; const logs = [];
+  const r = await poolPass({ privateKey: key, chains: ['txbt4', 'tbtc4'], limits: { fee: 1000, max: 1000000, perDay: 10 }, state, log: (s) => logs.push(s), fetch });
+  assert.equal(r.paid.length, 0);
+  assert.equal(posted.length, 0);
+  assert.ok(logs.some((l) => /also exists on/.test(l)));
+  // and if the deposit 11… had been paid from txbt4 already, seeing it on tbtc4 is a replay, not a swap
+  const state2 = { paid: { ['txbt4:' + '11'.repeat(32) + ':0']: { amount: 49000 } } };
+  const plan = planSwaps({ chain: 'tbtc4', incoming: [{ txid: '11'.repeat(32), vout: 0, value: 50000, sender }], poolAddress: pool, state: state2, limits: { fee: 1000, max: 1000000, perDay: 10, chains: ['txbt4', 'tbtc4'] } });
+  assert.equal(plan.payouts.length, 0);
+  assert.ok(state2.replayed['tbtc4:' + '11'.repeat(32) + ':0']);
 });
