@@ -14,7 +14,7 @@
 import {
   VERSION, CHAINS, DEFAULT_CHAIN, DEFAULT_FAUCET, INIT_AMOUNT, MIN_FEE,
   isGitRepo, resolveKey, resolveVoucher, parseFaucet, createFaucet, refreshVoucher, lookupUtxos, saveVoucher,
-  planFunding, agentsFrom, fund, chainInfo, gitConfig, getPubkey, balanceOf, trailTxo, lookupOutput, explorerUrl, consolidate, bootstrap,
+  planFunding, agentsFrom, fund, chainInfo, gitConfig, getPubkey, balanceOf, trailTxo, lookupOutput, explorerUrl, consolidate, bootstrap, twinChainOf, existsOnChain,
   canAdoptForBootstrap, latestVersion, isNewer,
 } from '../index.js';
 import fs from 'fs';
@@ -220,6 +220,16 @@ async function consolidateCmd() {
   console.log(`  Total:  ${plan.total.toLocaleString()} sats`);
   console.log(`  Fee:    ${plan.fee.toLocaleString()} sats`);
   console.log(`  Output: ${plan.amount.toLocaleString()} sats back to the voucher address`);
+  // On a Core-signed chain the spend is valid on the BLAKE2b twin whenever every input exists there too
+  if (plan.chain.sighash !== 'unified') {
+    const twin = twinChainOf(voucher.chain);
+    if (twin) {
+      const seen = await Promise.all(plan.inputs.map((u) => existsOnChain(twin, u.txid)));
+      if (seen.every((x) => x === true)) console.log(`  Warning: every input also exists on ${twin}; this BIP341 spend would be valid there too and could be replayed. Include a coin that lives on ${voucher.chain} alone, or spend the ${twin} twins first.`);
+      else if (seen.some((x) => x === null)) console.log(`  Note: could not check ${twin} for every input; a BIP341 spend replays there if all inputs exist on both chains.`);
+      else console.log(`  Replay: ${seen.filter((x) => x === false).length} of ${seen.length} inputs live on ${voucher.chain} alone, so this cannot be replayed on ${twin}.`);
+    }
+  }
   if (dryRun) { console.log(`\nRaw: ${r.hex}`); console.log('\n--dry-run: Transaction not broadcast.'); return; }
   console.log(`\nTransaction broadcast: ${r.txid}`);
   console.log(`Explorer: ${explorerUrl(voucher.chain, r.txid)}`);
