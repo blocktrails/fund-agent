@@ -78,7 +78,7 @@ async function answer({ paid, refused }) {
 // explorers have seen the deposit, instead of at the next poll. The pass itself verifies everything.
 let wake = null;
 const seen = new Set();
-const xonly = publicKey.slice(2);
+const xonly = publicKey.length === 66 ? publicKey.slice(2) : publicKey;   // the x-only key, as the address and the p tag spell it
 if (relays.length && !once) {
   subscribe({
     relays, log,
