@@ -48,7 +48,7 @@ if (uiPort) serveUi({ port: Number(uiPort), snapshot: () => poolSnapshot({ publi
 async function pass() {
   let r;
   try {
-    r = await poolPass({ privateKey, chains, limits, state, dryRun, log });
+    r = await poolPass({ privateKey, chains, limits, state, dryRun, log, requests: state.requests || {} });
     if (!dryRun) save();
   } catch (e) { log(`pass failed: ${e.message}`); return null; }
   if (relays.length && !dryRun && r) await answer(r);
@@ -90,6 +90,8 @@ if (relays.length && !once) {
       const req = readSwapRequest(ev);
       if (!req || req.pool !== xonly || !chains.includes(req.chain) || !chains.includes(req.to)) return;
       if (state.paid?.[`${req.chain}:${req.txid}:${req.vout}`] || state.refused?.[`${req.chain}:${req.txid}:${req.vout}`]) return;
+      (state.requests ||= {})[`${req.txid}:${req.vout}`] = { chain: req.chain, to: req.to, from: req.from, at: new Date().toISOString() };
+      if (!dryRun) save();
       log(`request: ${req.amount} sats on ${req.chain} → ${req.to}, ${req.txid.slice(0, 12)}…:${req.vout} from ${req.from.slice(0, 12)}…; pass in 3 s`);
       if (wake) setTimeout(wake, 3000);
     },
