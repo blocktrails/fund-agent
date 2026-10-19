@@ -14,7 +14,7 @@
 import {
   VERSION, CHAINS, DEFAULT_CHAIN, DEFAULT_FAUCET, INIT_AMOUNT, MIN_FEE,
   isGitRepo, resolveKey, resolveVoucher, parseFaucet, createFaucet, refreshVoucher, lookupUtxos, saveVoucher,
-  planFunding, agentsFrom, fund, chainInfo, gitConfig, getPubkey, balanceOf, trailTxo, lookupOutput, explorerUrl, consolidate, bootstrap,
+  planFunding, agentsFrom, fund, chainInfo, gitConfig, getPubkey, balanceOf, trailTxo, lookupOutput, explorerUrl, consolidate, bootstrap, addressOf, broadcast,
   canAdoptForBootstrap, latestVersion, isNewer,
 } from '../index.js';
 import fs from 'fs';
@@ -33,6 +33,7 @@ Usage:
   npx fund-agent status                   what the voucher file holds
   npx fund-agent balance                  what this repo's agent key holds
   npx fund-agent consolidate [--dry-run]  merge every coin at the voucher address into one
+  npx fund-agent swap <sats> --to <chain> --pool <address>   send sats to a swap pool; the same, less its fee, arrives on the other chain
 
 The voucher file: ${DEFAULT_FAUCET}
   (override with FUND_AGENT_FAUCET=<path>)
@@ -57,6 +58,7 @@ Options:
   --force        Discard the existing key and generate + fund a new one
   --no-fund      Generate the key only, do not look for a voucher
   --dry-run      Show transaction plan without broadcasting (--dry works too)
+  --to <chain>   swap: the chain you want coins on; --pool <address> the pool's address (same on both chains)
   --bootstrap    With init: take one coin from the public bootstrap address into a new key of your own
 
 Chains:
@@ -77,8 +79,8 @@ const dryRun = args.includes('--dry-run') || args.includes('--dry');   // --dry 
 const noFund = args.includes('--no-fund');
 const useBootstrap = args.includes('--bootstrap');
 const chainFlag = flag('--chain');
-const positional = args.filter((a, i) => !a.startsWith('-') && args[i - 1] !== '--chain');
-const command = ['init', 'status', 'balance', 'consolidate'].includes(positional[0]) ? positional.shift() : 'fund';
+const positional = args.filter((a, i) => !a.startsWith('-') && !['--chain', '--to', '--pool'].includes(args[i - 1]));
+const command = ['init', 'status', 'balance', 'consolidate', 'swap'].includes(positional[0]) ? positional.shift() : 'fund';
 const voucherArg = positional[0];
 
 function die(msg) { console.error(`Error: ${msg}`); process.exit(1); }
@@ -203,6 +205,40 @@ async function balance() {
   }
 }
 
+// Send sats from this repo's agent key to a swap pool on the chain it has coins on; the pool pays the
+// same amount, less its fee, to this key's address on the other chain, since the address is the same there.
+async function swapCmd() {
+  const privateKey = gitConfig('nostr.privkey') || gitConfig('nostr.privkey', null, true);
+  if (!privateKey) die('No agent key in git config (nostr.privkey). Run: npm create agent@latest');
+  const sats = parseInt(positional[0], 10);
+  if (!Number.isInteger(sats) || sats <= 0) die('Usage: npx fund-agent swap <sats> --to <chain> --pool <address>');
+  const to = flag('--to'); const pool = flag('--pool') || gitConfig('swap.pool') || gitConfig('swap.pool', null, true);
+  if (!to) die('--to <chain> is required: the chain you want the coins on');
+  if (!pool) die('--pool <address> is required (or git config swap.pool <address>)');
+  const from = chainFlag || gitConfig('gitmark.network') || gitConfig('gitmark.network', null, true) || DEFAULT_CHAIN;
+  if (from === to) die(`--to must be the other chain; this key is on ${from}`);
+  chainInfo(to);
+  const { xonlyOfAddress, buildPayment, pickCoin } = await import('../lib/pool.js');
+  const poolPub = xonlyOfAddress(pool, chainInfo(from).hrp);
+  if (!poolPub) die('The pool address must be a raw-key taproot address for this chain');
+  const pubkey = getPubkey(privateKey);
+  const address = addressOf(from, pubkey);
+  const coins = await lookupUtxos(from, address);
+  const coin = pickCoin(coins, sats);
+  if (!coin) die(`No coin at ${address} on ${from} covers ${sats.toLocaleString()} sats plus the ${MIN_FEE.toLocaleString()} sat fee`);
+  const { hex, txid, change } = await buildPayment({ privateKey, chainId: from, utxo: coin, outputs: [{ pubkey: poolPub, amount: sats }] });
+  console.log(`Swap:    ${sats.toLocaleString()} sats on ${from} → the same, less the pool's fee, on ${to}`);
+  console.log(`From:    ${address}`);
+  console.log(`Pool:    ${pool}`);
+  console.log(`Coin:    ${coin.value.toLocaleString()} sats txo:${from}:${coin.txid}:${coin.vout}; change ${change.toLocaleString()} sats; fee ${MIN_FEE.toLocaleString()}`);
+  console.log(`Arrives: at ${addressOf(to, pubkey)} on ${to}, within a block`);
+  if (dryRun) { console.log(`\nRaw: ${hex}`); console.log('\n--dry-run: Transaction not broadcast.'); return; }
+  const sent = await broadcast(hex, from);
+  console.log(`\nTransaction broadcast: ${sent}`);
+  console.log(`Explorer: ${explorerUrl(from, sent)}`);
+  console.log(`Check:    npx fund-agent balance --chain ${to}`);
+}
+
 async function consolidateCmd() {
   const v = resolveVoucher(voucherArg);
   if (!v) die(`No voucher file at ${DEFAULT_FAUCET}. Run: npx fund-agent init`);
@@ -238,6 +274,7 @@ async function main() {
   if (command === 'status') return status();
   if (command === 'balance') return balance();
   if (command === 'consolidate') return consolidateCmd();
+  if (command === 'swap') return swapCmd();
 
   if (!useGlobal && !isGitRepo()) die('Not in a git repository. Use --global for global config.');
 

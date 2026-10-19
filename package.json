@@ -12,7 +12,8 @@
   "type": "module",
   "main": "index.js",
   "bin": {
-    "fund-agent": "./bin/fund-agent.js"
+    "fund-agent": "./bin/fund-agent.js",
+    "swap-pool": "bin/swap-pool.js"
   },
   "scripts": {
     "test": "node --test && node bin/fund-agent.js --help > /dev/null"
