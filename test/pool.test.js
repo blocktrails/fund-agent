@@ -121,5 +121,7 @@ test('the pool page renders reserves, swaps and the swap command from a snapshot
   assert.match(html, /txbt4 → tbtc4/);
   assert.match(html, /over the cap/);
   assert.match(html, /1 deposit seen on both chains/);
-  assert.doesNotMatch(html, /<script/);
+  assert.match(html, /data-tab="swap"/);
+  assert.match(html, /You receive/);
+  assert.match(html, /id="flip"/);
 });
