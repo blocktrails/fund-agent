@@ -68,6 +68,7 @@ test('poolPass: an arrival on txbt4 is paid on tbtc4 from the pool coin there, r
     if (init.method === 'POST') { posted.push(url); return { ok: true, status: 200, text: async () => 'ee'.repeat(32) }; }
     if (url.includes('mempool.guide') && url.endsWith(`/address/${poolTx}/utxo`)) return { ok: true, json: async () => [{ txid: '11'.repeat(32), vout: 0, value: 50000, status: { confirmed: true } }] };
     if (url.includes('mempool.space') && url.endsWith(`/address/${poolTx}/utxo`)) return { ok: true, json: async () => [{ txid: '22'.repeat(32), vout: 0, value: 400000, status: { confirmed: true } }] };
+    if (url.includes('mempool.space') && url.endsWith(`/tx/${'11'.repeat(32)}`)) return { ok: false, status: 404 };   // the deposit lives on txbt4 alone
     if (url.endsWith(`/tx/${'11'.repeat(32)}`)) return { ok: true, json: async () => ({ vin: [{ prevout: { scriptpubkey_address: sender } }] }) };
     if (url.includes('mempool.guide') && url.endsWith(`/tx/${'22'.repeat(32)}`)) return { ok: false, status: 404 };   // the pool's tbtc4 coin is unknown on txbt4
     if (url.endsWith(`/tx/${'22'.repeat(32)}`)) return { ok: true, json: async () => ({ vin: [{ prevout: { scriptpubkey_address: 'tb1psomeoneelse' } }] }) };
