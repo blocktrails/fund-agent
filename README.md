@@ -69,7 +69,16 @@ polls both sides, pays what arrives, and serves a page with a Swap tab (which sh
 run) and a Pool tab (reserves, ledger, refusals) plus `/pool.json`. Defaults: fee 1,000 sats, cap
 1,000,000 per swap, 10 swaps per key per day; `--reserve addr,addr` names top-up addresses that are
 never paid back; `--once` and `--dry-run` for a look; `--on-change '<command>'` runs a command after any pass that
-paid or refused something, the ledger's publish script say, and the next pass waits for it. The pool never pays from a coin that also
+paid or refused something, the ledger's publish script say, and the next pass waits for it.
+
+A swap is announced as well as sent. After the broadcast, `fund-agent swap` publishes a kind 30619 event to the
+relays in `git config nostr.relays` (or the defaults): `d` = the deposit outpoint `<chain>:<txid>:<vout>`, `p` = the
+pool's key, `chain`, `to`, `amount`, optionally `tx` with the raw deposit. The pool subscribes with `#p` = its own key
+(`--relays`, or `--no-nostr`), wakes when a request arrives, and pays on that pass instead of the next poll; it still
+pays only for a coin it finds on the chain, and the return address is still the deposit's first input, never the
+event's key. It answers from its own key with the same `d`: `paid` = payout txid, or `refused` = the reason. A request
+that reaches no relay costs nothing: the poll finds the deposit anyway. Talking to relays uses Node's own WebSocket, so it
+needs Node 22 or newer; on an older Node the swap command says so and the pool runs as if `--no-nostr` were given. The pool never pays from a coin that also
 exists on the other chain, and a deposit that is itself a replay is paid once, so the two sides can
 never be made to pay twice.
 
