@@ -69,8 +69,8 @@ test('poolPass: an arrival on txbt4 is paid on tbtc4 from the pool coin there, r
     if (url.includes('mempool.guide') && url.endsWith(`/address/${poolTx}/utxo`)) return { ok: true, json: async () => [{ txid: '11'.repeat(32), vout: 0, value: 50000, status: { confirmed: true } }] };
     if (url.includes('mempool.space') && url.endsWith(`/address/${poolTx}/utxo`)) return { ok: true, json: async () => [{ txid: '22'.repeat(32), vout: 0, value: 400000, status: { confirmed: true } }] };
     if (url.endsWith(`/tx/${'11'.repeat(32)}`)) return { ok: true, json: async () => ({ vin: [{ prevout: { scriptpubkey_address: sender } }] }) };
+    if (url.includes('mempool.guide') && url.endsWith(`/tx/${'22'.repeat(32)}`)) return { ok: false, status: 404 };   // the pool's tbtc4 coin is unknown on txbt4
     if (url.endsWith(`/tx/${'22'.repeat(32)}`)) return { ok: true, json: async () => ({ vin: [{ prevout: { scriptpubkey_address: 'tb1psomeoneelse' } }] }) };
-    if (url.includes('/outspend/')) return { ok: url.includes('mempool.space'), status: url.includes('mempool.space') ? 200 : 404 };   // the pool's tbtc4 coin exists on tbtc4 only
     return { ok: false, status: 404, json: async () => ({}), text: async () => '' };
   };
   const state = {}; const logs = [];
@@ -94,8 +94,7 @@ test('poolPass never pays from a coin that also exists on the other chain, and a
     if (init.method === 'POST') { posted.push(url); return { ok: true, status: 200, text: async () => 'ee'.repeat(32) }; }
     if (url.endsWith(`/address/${pool}/utxo`)) return { ok: true, json: async () => [{ txid: '11'.repeat(32), vout: 0, value: 50000, status: { confirmed: true } }, { txid: '22'.repeat(32), vout: 0, value: 400000, status: { confirmed: true } }] };  // same coins on both chains: twins
     if (url.endsWith(`/tx/${'11'.repeat(32)}`)) return { ok: true, json: async () => ({ vin: [{ prevout: { scriptpubkey_address: sender } }] }) };
-    if (url.endsWith(`/tx/${'22'.repeat(32)}`)) return { ok: true, json: async () => ({ vin: [{ prevout: { scriptpubkey_address: 'tb1pelse' } }] }) };
-    if (url.includes('/outspend/')) return { ok: true, status: 200 };            // every outpoint exists on both chains
+    if (url.endsWith(`/tx/${'22'.repeat(32)}`)) return { ok: true, status: 200, json: async () => ({ vin: [{ prevout: { scriptpubkey_address: 'tb1pelse' } }], vout: [{}] }) };   // known on both chains: a twin
     return { ok: false, status: 404, json: async () => ({}), text: async () => '' };
   };
   const state = {}; const logs = [];
