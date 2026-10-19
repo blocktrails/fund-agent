@@ -38,7 +38,9 @@ the trail's current coin too.
 
 When an agent retires, `git mark exodus` sends its coin back to the voucher address, where it sits as a
 separate UTXO. `npx fund-agent consolidate` merges every coin there, unconfirmed included, into one and makes that
-the voucher, so returned coins fund agents again. `--dry-run` prints the plan and the raw transaction.
+the voucher, so returned coins fund agents again. `--dry-run` prints the plan and the raw transaction. On the
+Core-signed chains (tbtc4, btc) the spend is BIP341, which is also valid on the BLAKE2b twin whenever every input
+exists there; consolidate checks the twin first and refuses such a spend unless you pass `--force`.
 
 If someone hands you a voucher string instead, store it with `npx fund-agent init "txo:…"`.
 
@@ -201,7 +203,7 @@ at its address, so a bootstrap can land in it.
 
 Every confirmed coin at the voucher address, largest first, into one output back to the voucher key, fee
 `consolidationFee(n)` = 1,000 sats plus 100 per extra input. Unconfirmed coins are merged too. Refuses with fewer than two coins or when the result would be under
-10,000 sats. On the BLAKE2b chains only (unified sighash). The
+10,000 sats. Unified sighash on the BLAKE2b chains, BIP341 key-path on tbtc4 and btc. The
 merged coin is written to the voucher file.
 
 ### `addressOf(chain, pubkey)`, `lookupUtxos(chain, address)`, `agentsFrom(sats)`
