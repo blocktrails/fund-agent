@@ -1,0 +1,192 @@
+{
+  "@context": {
+    "@vocab": "https://mindstr.org/ns#",
+    "link": {
+      "@type": "@id"
+    },
+    "parent": {
+      "@type": "@id"
+    }
+  },
+  "version": "0.2",
+  "nodes": [
+    {
+      "@id": "#this",
+      "name": "Fund Agent",
+      "x": 0,
+      "y": 0,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/SKILL.md#fund-agent",
+      "bgColor": "#ebc573"
+    },
+    {
+      "@id": "#imr4n9",
+      "name": "sections 1/2",
+      "x": 227,
+      "y": 88,
+      "bgColor": "#acd5ff",
+      "parent": "#this"
+    },
+    {
+      "@id": "#tpktj6",
+      "name": "When to Use",
+      "x": 408,
+      "y": -246,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/SKILL.md#when-to-use",
+      "bgColor": "#daeeff",
+      "parent": "#imr4n9"
+    },
+    {
+      "@id": "#u94rpy",
+      "name": "The one line",
+      "x": 574,
+      "y": -115,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/SKILL.md#the-one-line",
+      "bgColor": "#daeeff",
+      "parent": "#imr4n9"
+    },
+    {
+      "@id": "#7txfyn",
+      "name": "Setting up the voucher file, once",
+      "x": 482,
+      "y": 114,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/SKILL.md#setting-up-the-voucher-file-once",
+      "bgColor": "#daeeff",
+      "parent": "#imr4n9"
+    },
+    {
+      "@id": "#v5njcx",
+      "name": "Retiring an agent: the coin comes back",
+      "x": 352,
+      "y": 402,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/SKILL.md#retiring-an-agent-the-coin-comes-back",
+      "bgColor": "#daeeff",
+      "parent": "#imr4n9"
+    },
+    {
+      "@id": "#z8kicz",
+      "name": "Arguments",
+      "x": 48,
+      "y": 423,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/SKILL.md#arguments",
+      "bgColor": "#daeeff",
+      "parent": "#imr4n9"
+    },
+    {
+      "@id": "#7348h9",
+      "name": "sections 2/2",
+      "x": -245,
+      "y": 42,
+      "bgColor": "#febdc6",
+      "parent": "#this"
+    },
+    {
+      "@id": "#jtny2v",
+      "name": "Voucher forms",
+      "x": -312,
+      "y": 332,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/SKILL.md#voucher-forms",
+      "bgColor": "#ffe2e6",
+      "parent": "#7348h9"
+    },
+    {
+      "@id": "#zvvi4r",
+      "name": "Output",
+      "x": -504,
+      "y": 261,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/SKILL.md#output",
+      "bgColor": "#ffe2e6",
+      "parent": "#7348h9"
+    },
+    {
+      "@id": "#ezqtt6",
+      "name": "Library",
+      "x": -490,
+      "y": 83,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/SKILL.md#library",
+      "bgColor": "#ffe2e6",
+      "parent": "#7348h9"
+    },
+    {
+      "@id": "#8edjsn",
+      "name": "Security Notes",
+      "x": -583,
+      "y": -77,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/SKILL.md#security-notes",
+      "bgColor": "#ffe2e6",
+      "parent": "#7348h9"
+    },
+    {
+      "@id": "#75s7ir",
+      "name": "References",
+      "x": -438,
+      "y": -205,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/SKILL.md#references",
+      "bgColor": "#ffe2e6",
+      "parent": "#7348h9"
+    },
+    {
+      "@id": "#7x3k79",
+      "name": "← fund-agent",
+      "x": -25,
+      "y": -211,
+      "link": "./index.jsonld",
+      "bgColor": "#ececec",
+      "parent": "#this"
+    }
+  ],
+  "connections": [
+    {
+      "start": 0,
+      "end": 1
+    },
+    {
+      "start": 1,
+      "end": 2
+    },
+    {
+      "start": 1,
+      "end": 3
+    },
+    {
+      "start": 1,
+      "end": 4
+    },
+    {
+      "start": 1,
+      "end": 5
+    },
+    {
+      "start": 1,
+      "end": 6
+    },
+    {
+      "start": 0,
+      "end": 7
+    },
+    {
+      "start": 7,
+      "end": 8
+    },
+    {
+      "start": 7,
+      "end": 9
+    },
+    {
+      "start": 7,
+      "end": 10
+    },
+    {
+      "start": 7,
+      "end": 11
+    },
+    {
+      "start": 7,
+      "end": 12
+    },
+    {
+      "start": 0,
+      "end": 13
+    }
+  ],
+  "selectedNode": 0
+}

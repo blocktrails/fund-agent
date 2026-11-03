@@ -1,0 +1,179 @@
+{
+  "@context": {
+    "@vocab": "https://mindstr.org/ns#",
+    "link": {
+      "@type": "@id"
+    },
+    "parent": {
+      "@type": "@id"
+    }
+  },
+  "version": "0.2",
+  "nodes": [
+    {
+      "@id": "#this",
+      "name": "pool.js",
+      "x": 0,
+      "y": 0,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/pool.js",
+      "bgColor": "#ebc573"
+    },
+    {
+      "@id": "#4bfmpa",
+      "name": "exports 1/2",
+      "x": 248,
+      "y": -29,
+      "bgColor": "#acd5ff",
+      "parent": "#this"
+    },
+    {
+      "@id": "#c2mpq8",
+      "name": "xonlyOfAddress()",
+      "x": 379,
+      "y": -277,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/pool.js#L19",
+      "bgColor": "#daeeff",
+      "parent": "#4bfmpa"
+    },
+    {
+      "@id": "#yykmee",
+      "name": "otherChain()",
+      "x": 558,
+      "y": -162,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/pool.js#L33",
+      "bgColor": "#daeeff",
+      "parent": "#4bfmpa"
+    },
+    {
+      "@id": "#7kgwkb",
+      "name": "planSwaps()",
+      "x": 499,
+      "y": 22,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/pool.js#L52",
+      "bgColor": "#daeeff",
+      "parent": "#4bfmpa"
+    },
+    {
+      "@id": "#x7t4w7",
+      "name": "senderOf()",
+      "x": 535,
+      "y": 211,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/pool.js#L82",
+      "bgColor": "#daeeff",
+      "parent": "#4bfmpa"
+    },
+    {
+      "@id": "#dsw684",
+      "name": "exports 2/2",
+      "x": -23,
+      "y": 212,
+      "bgColor": "#f3bee1",
+      "parent": "#this"
+    },
+    {
+      "@id": "#v88t4a",
+      "name": "buildPayment()",
+      "x": 227,
+      "y": 379,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/pool.js#L93",
+      "bgColor": "#fce3f3",
+      "parent": "#dsw684"
+    },
+    {
+      "@id": "#skzt29",
+      "name": "pickCoin()",
+      "x": 56,
+      "y": 499,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/pool.js#L112",
+      "bgColor": "#fce3f3",
+      "parent": "#dsw684"
+    },
+    {
+      "@id": "#t4pwzt",
+      "name": "poolPass()",
+      "x": -138,
+      "y": 409,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/pool.js#L130",
+      "bgColor": "#fce3f3",
+      "parent": "#dsw684"
+    },
+    {
+      "@id": "#jhaa84",
+      "name": "runHook()",
+      "x": -359,
+      "y": 398,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/pool.js#L196",
+      "bgColor": "#fce3f3",
+      "parent": "#dsw684"
+    },
+    {
+      "@id": "#wavvy9",
+      "name": "211 lines",
+      "x": -249,
+      "y": -18,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/pool.js",
+      "bgColor": "#ececec",
+      "parent": "#this"
+    },
+    {
+      "@id": "#i9w3v4",
+      "name": "← lib/",
+      "x": -36,
+      "y": -210,
+      "link": "./src.jsonld",
+      "bgColor": "#ececec",
+      "parent": "#this"
+    }
+  ],
+  "connections": [
+    {
+      "start": 0,
+      "end": 1
+    },
+    {
+      "start": 1,
+      "end": 2
+    },
+    {
+      "start": 1,
+      "end": 3
+    },
+    {
+      "start": 1,
+      "end": 4
+    },
+    {
+      "start": 1,
+      "end": 5
+    },
+    {
+      "start": 0,
+      "end": 6
+    },
+    {
+      "start": 6,
+      "end": 7
+    },
+    {
+      "start": 6,
+      "end": 8
+    },
+    {
+      "start": 6,
+      "end": 9
+    },
+    {
+      "start": 6,
+      "end": 10
+    },
+    {
+      "start": 0,
+      "end": 11
+    },
+    {
+      "start": 0,
+      "end": 12
+    }
+  ],
+  "selectedNode": 0
+}

@@ -1,0 +1,102 @@
+{
+  "@context": {
+    "@vocab": "https://mindstr.org/ns#",
+    "link": {
+      "@type": "@id"
+    },
+    "parent": {
+      "@type": "@id"
+    }
+  },
+  "version": "0.2",
+  "nodes": [
+    {
+      "@id": "#this",
+      "name": "tx.js",
+      "x": 0,
+      "y": 0,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/tx.js",
+      "bgColor": "#ebc573"
+    },
+    {
+      "@id": "#z8kicz",
+      "name": "exports",
+      "x": 250,
+      "y": 3,
+      "bgColor": "#acd5ff",
+      "parent": "#this"
+    },
+    {
+      "@id": "#7348h9",
+      "name": "HASH_TYPE()",
+      "x": 418,
+      "y": -233,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/tx.js#L11",
+      "bgColor": "#daeeff",
+      "parent": "#z8kicz"
+    },
+    {
+      "@id": "#jtny2v",
+      "name": "p2trScript()",
+      "x": 590,
+      "y": 8,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/tx.js#L18",
+      "bgColor": "#daeeff",
+      "parent": "#z8kicz"
+    },
+    {
+      "@id": "#zvvi4r",
+      "name": "buildUnifiedTx()",
+      "x": 410,
+      "y": 244,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/tx.js#L46",
+      "bgColor": "#daeeff",
+      "parent": "#z8kicz"
+    },
+    {
+      "@id": "#ezqtt6",
+      "name": "84 lines",
+      "x": -130,
+      "y": 182,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/tx.js",
+      "bgColor": "#ececec",
+      "parent": "#this"
+    },
+    {
+      "@id": "#8edjsn",
+      "name": "← lib/",
+      "x": -123,
+      "y": -185,
+      "link": "./src.jsonld",
+      "bgColor": "#ececec",
+      "parent": "#this"
+    }
+  ],
+  "connections": [
+    {
+      "start": 0,
+      "end": 1
+    },
+    {
+      "start": 1,
+      "end": 2
+    },
+    {
+      "start": 1,
+      "end": 3
+    },
+    {
+      "start": 1,
+      "end": 4
+    },
+    {
+      "start": 0,
+      "end": 5
+    },
+    {
+      "start": 0,
+      "end": 6
+    }
+  ],
+  "selectedNode": 0
+}

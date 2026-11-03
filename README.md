@@ -1,5 +1,7 @@
 # fund-agent
 
+[![Mind map](https://mindstr.org/badge.svg)](https://mindstr.org/?uri=https://blocktrails.org/fund-agent/mindstr/index.jsonld)
+
 Initialize `git config nostr.privkey` with funds from a TXO voucher.
 
 ## Install
