@@ -112,7 +112,5 @@
 - [Open issues · 2](https://github.com/blocktrails/fund-agent/issues)
   - [#4 Add the --publish switch: default t…](https://github.com/blocktrails/fund-agent/issues/4)
   - [#1 Write nostr.voucher (bootstrap hand…](https://github.com/blocktrails/fund-agent/issues/1)
-- [Initialize git config nostr.privkey with fu…](https://github.com/blocktrails/fund-agent)
-  - [71 commits, 2026-01-24 to 2026-10-19](https://github.com/blocktrails/fund-agent/commits/gh-pages)
-  - branches: cli-imports-library-chains, gh-page…
-  - [1 stars](https://github.com/blocktrails/fund-agent/stargazers)
+- [Initialize git config nostr.privkey with funds from a…](https://github.com/blocktrails/fund-agent)
+  - [since Jan 2026 · last 19 Oct 2026](https://github.com/blocktrails/fund-agent/commits/gh-pages)

@@ -21,8 +21,8 @@
     {
       "@id": "#4af2dc",
       "name": "README · 3 ›",
-      "x": 213,
-      "y": -112,
+      "x": 222,
+      "y": -97,
       "link": "./readme.jsonld",
       "bgColor": "#acd5ff",
       "parent": "#this"
@@ -30,8 +30,8 @@
     {
       "@id": "#7iui3z",
       "name": "Install",
-      "x": 338,
-      "y": -314,
+      "x": 350,
+      "y": -303,
       "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#install",
       "bgColor": "#daeeff",
       "parent": "#4af2dc"
@@ -39,8 +39,8 @@
     {
       "@id": "#bq9ccn",
       "name": "Usage",
-      "x": 502,
-      "y": -263,
+      "x": 525,
+      "y": -229,
       "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#usage",
       "bgColor": "#daeeff",
       "parent": "#4af2dc"
@@ -48,8 +48,8 @@
     {
       "@id": "#3yirdr",
       "name": "API",
-      "x": 481,
-      "y": -116,
+      "x": 494,
+      "y": -65,
       "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#api",
       "bgColor": "#daeeff",
       "parent": "#4af2dc"
@@ -57,16 +57,16 @@
     {
       "@id": "#ptf2jy",
       "name": "Docs · 1",
-      "x": 227,
-      "y": 90,
+      "x": 195,
+      "y": 133,
       "bgColor": "#e9c1ef",
       "parent": "#this"
     },
     {
       "@id": "#4bfy6j",
       "name": "SKILL.md · 10 ›",
-      "x": 453,
-      "y": 179,
+      "x": 391,
+      "y": 265,
       "link": "./doc-skill.jsonld",
       "bgColor": "#f7e4f9",
       "parent": "#ptf2jy"
@@ -74,8 +74,8 @@
     {
       "@id": "#4wkdd9",
       "name": "Source · lib/ · 7 files ›",
-      "x": 36,
-      "y": 210,
+      "x": -62,
+      "y": 206,
       "link": "./src.jsonld",
       "bgColor": "#fec0b1",
       "parent": "#this"
@@ -83,8 +83,8 @@
     {
       "@id": "#yiscsp",
       "name": "Open issues · 2",
-      "x": -220,
-      "y": 100,
+      "x": -249,
+      "y": -21,
       "link": "https://github.com/blocktrails/fund-agent/issues",
       "bgColor": "#d7d59b",
       "parent": "#this"
@@ -92,8 +92,8 @@
     {
       "@id": "#2fzfhg",
       "name": "#4 Add the --publish switch: default t…",
-      "x": -349,
-      "y": 305,
+      "x": -484,
+      "y": 108,
       "link": "https://github.com/blocktrails/fund-agent/issues/4",
       "bgColor": "#eeedd3",
       "parent": "#yiscsp"
@@ -101,44 +101,27 @@
     {
       "@id": "#6ab87r",
       "name": "#1 Write nostr.voucher (bootstrap hand…",
-      "x": -580,
-      "y": 93,
+      "x": -530,
+      "y": -221,
       "link": "https://github.com/blocktrails/fund-agent/issues/1",
       "bgColor": "#eeedd3",
       "parent": "#yiscsp"
     },
     {
       "@id": "#uyfscv",
-      "name": "Initialize git config nostr.privkey with fu…",
-      "x": -98,
-      "y": -195,
+      "name": "Initialize git config nostr.privkey with funds from a…",
+      "x": -12,
+      "y": -212,
       "link": "https://github.com/blocktrails/fund-agent",
       "bgColor": "#ececec",
       "parent": "#this"
     },
     {
       "@id": "#z5cumb",
-      "name": "71 commits, 2026-01-24 to 2026-10-19",
-      "x": -394,
-      "y": -261,
+      "name": "since Jan 2026 · last 19 Oct 2026",
+      "x": -25,
+      "y": -424,
       "link": "https://github.com/blocktrails/fund-agent/commits/gh-pages",
-      "bgColor": "#ececec",
-      "parent": "#uyfscv"
-    },
-    {
-      "@id": "#7iejm3",
-      "name": "branches: cli-imports-library-chains, gh-page…",
-      "x": -168,
-      "y": -481,
-      "bgColor": "#ececec",
-      "parent": "#uyfscv"
-    },
-    {
-      "@id": "#452y5w",
-      "name": "1 stars",
-      "x": 107,
-      "y": -415,
-      "link": "https://github.com/blocktrails/fund-agent/stargazers",
       "bgColor": "#ececec",
       "parent": "#uyfscv"
     }
@@ -191,14 +174,6 @@
     {
       "start": 11,
       "end": 12
-    },
-    {
-      "start": 11,
-      "end": 13
-    },
-    {
-      "start": 11,
-      "end": 14
     }
   ],
   "selectedNode": 0
