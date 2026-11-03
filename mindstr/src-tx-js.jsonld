@@ -19,54 +19,63 @@
       "bgColor": "#ebc573"
     },
     {
-      "@id": "#z8kicz",
-      "name": "exports",
-      "x": 250,
-      "y": 3,
+      "@id": "#zvvi4r",
+      "name": "Taproot key-path spend signed with the unified…",
+      "x": 222,
+      "y": -65,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/tx.js#L1",
       "bgColor": "#acd5ff",
       "parent": "#this"
     },
     {
-      "@id": "#7348h9",
-      "name": "HASH_TYPE()",
-      "x": 418,
-      "y": -233,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/tx.js#L11",
-      "bgColor": "#daeeff",
-      "parent": "#z8kicz"
-    },
-    {
-      "@id": "#jtny2v",
-      "name": "p2trScript()",
-      "x": 590,
-      "y": 8,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/tx.js#L18",
-      "bgColor": "#daeeff",
-      "parent": "#z8kicz"
-    },
-    {
-      "@id": "#zvvi4r",
-      "name": "buildUnifiedTx()",
-      "x": 410,
-      "y": 244,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/tx.js#L46",
-      "bgColor": "#daeeff",
-      "parent": "#z8kicz"
-    },
-    {
       "@id": "#ezqtt6",
+      "name": "exports",
+      "x": 59,
+      "y": 189,
+      "bgColor": "#f3bee1",
+      "parent": "#this"
+    },
+    {
+      "@id": "#8edjsn",
+      "name": "HASH_TYPE",
+      "x": 279,
+      "y": 278,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/tx.js#L11",
+      "bgColor": "#fce3f3",
+      "parent": "#ezqtt6"
+    },
+    {
+      "@id": "#75s7ir",
+      "name": "p2trScript()",
+      "x": 109,
+      "y": 353,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/tx.js#L18",
+      "bgColor": "#fce3f3",
+      "parent": "#ezqtt6"
+    },
+    {
+      "@id": "#7x3k79",
+      "name": "buildUnifiedTx()",
+      "x": -81,
+      "y": 359,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/tx.js#L46",
+      "bgColor": "#fce3f3",
+      "parent": "#ezqtt6"
+    },
+    {
+      "@id": "#4af2dc",
       "name": "84 lines",
-      "x": -130,
-      "y": 182,
+      "x": -223,
+      "y": 48,
       "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/tx.js",
       "bgColor": "#ececec",
       "parent": "#this"
     },
     {
-      "@id": "#8edjsn",
+      "@id": "#7iui3z",
       "name": "← lib/",
-      "x": -123,
-      "y": -185,
+      "x": -59,
+      "y": -189,
       "link": "./src.jsonld",
       "bgColor": "#ececec",
       "parent": "#this"
@@ -78,24 +87,28 @@
       "end": 1
     },
     {
-      "start": 1,
+      "start": 0,
       "end": 2
     },
     {
-      "start": 1,
+      "start": 2,
       "end": 3
     },
     {
-      "start": 1,
+      "start": 2,
       "end": 4
     },
     {
-      "start": 0,
+      "start": 2,
       "end": 5
     },
     {
       "start": 0,
       "end": 6
+    },
+    {
+      "start": 0,
+      "end": 7
     }
   ],
   "selectedNode": 0

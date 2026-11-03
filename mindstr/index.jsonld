@@ -19,111 +19,265 @@
       "bgColor": "#ebc573"
     },
     {
-      "@id": "#4af2dc",
-      "name": "README · 3 ›",
-      "x": 222,
-      "y": -97,
-      "link": "./readme.jsonld",
+      "@id": "#tz98k5",
+      "name": "Live site",
+      "x": 205,
+      "y": -88,
+      "link": "https://blocktrails.org/fund-agent/",
       "bgColor": "#acd5ff",
       "parent": "#this"
     },
     {
-      "@id": "#7iui3z",
-      "name": "Install",
-      "x": 350,
-      "y": -303,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#install",
+      "@id": "#437yyk",
+      "name": "Initialize git config nostr.privkey with funds from a TXO…",
+      "x": 323,
+      "y": -242,
+      "link": "https://blocktrails.org/fund-agent/",
       "bgColor": "#daeeff",
-      "parent": "#4af2dc"
+      "parent": "#tz98k5"
     },
     {
-      "@id": "#bq9ccn",
-      "name": "Usage",
-      "x": 525,
-      "y": -229,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#usage",
+      "@id": "#j3k2bu",
+      "name": "blocktrails.org/fund-agent",
+      "x": 400,
+      "y": -134,
+      "link": "https://blocktrails.org/fund-agent/",
       "bgColor": "#daeeff",
-      "parent": "#4af2dc"
+      "parent": "#tz98k5"
     },
     {
-      "@id": "#3yirdr",
-      "name": "API",
-      "x": 494,
-      "y": -65,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#api",
-      "bgColor": "#daeeff",
-      "parent": "#4af2dc"
-    },
-    {
-      "@id": "#ptf2jy",
-      "name": "Docs · 1",
-      "x": 195,
-      "y": 133,
-      "bgColor": "#e9c1ef",
-      "parent": "#this"
-    },
-    {
-      "@id": "#4bfy6j",
-      "name": "SKILL.md · 10 ›",
-      "x": 391,
-      "y": 265,
-      "link": "./doc-skill.jsonld",
-      "bgColor": "#f7e4f9",
-      "parent": "#ptf2jy"
-    },
-    {
-      "@id": "#4wkdd9",
-      "name": "Source · lib/ · 7 files ›",
-      "x": -62,
-      "y": 206,
-      "link": "./src.jsonld",
-      "bgColor": "#fec0b1",
-      "parent": "#this"
-    },
-    {
-      "@id": "#yiscsp",
-      "name": "Open issues · 2",
-      "x": -249,
-      "y": -21,
-      "link": "https://github.com/blocktrails/fund-agent/issues",
-      "bgColor": "#d7d59b",
-      "parent": "#this"
-    },
-    {
-      "@id": "#2fzfhg",
-      "name": "#4 Add the --publish switch: default t…",
-      "x": -484,
-      "y": 108,
-      "link": "https://github.com/blocktrails/fund-agent/issues/4",
-      "bgColor": "#eeedd3",
-      "parent": "#yiscsp"
-    },
-    {
-      "@id": "#6ab87r",
-      "name": "#1 Write nostr.voucher (bootstrap hand…",
-      "x": -530,
-      "y": -221,
-      "link": "https://github.com/blocktrails/fund-agent/issues/1",
-      "bgColor": "#eeedd3",
-      "parent": "#yiscsp"
-    },
-    {
-      "@id": "#uyfscv",
-      "name": "Initialize git config nostr.privkey with funds from a…",
-      "x": -12,
-      "y": -212,
-      "link": "https://github.com/blocktrails/fund-agent",
-      "bgColor": "#ececec",
-      "parent": "#this"
-    },
-    {
-      "@id": "#z5cumb",
+      "@id": "#uhqx6j",
       "name": "since Jan 2026 · last 19 Oct 2026",
-      "x": -25,
-      "y": -424,
+      "x": 427,
+      "y": -44,
       "link": "https://github.com/blocktrails/fund-agent/commits/gh-pages",
       "bgColor": "#ececec",
-      "parent": "#uyfscv"
+      "parent": "#tz98k5"
+    },
+    {
+      "@id": "#aurbbn",
+      "name": "Data",
+      "x": 93,
+      "y": 179,
+      "link": "https://github.com/blocktrails/fund-agent/tree/gh-pages",
+      "bgColor": "#d9c6fb",
+      "parent": "#this"
+    },
+    {
+      "@id": "#fxz322",
+      "name": "Chains · 6",
+      "x": 256,
+      "y": 294,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#chains",
+      "bgColor": "#cccbff",
+      "parent": "#aurbbn"
+    },
+    {
+      "@id": "#s77s87",
+      "name": "tbtc4: Bitcoin testnet4",
+      "x": 561,
+      "y": 243,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#chains",
+      "bgColor": "#e9e8ff",
+      "parent": "#fxz322"
+    },
+    {
+      "@id": "#k73rni",
+      "name": "tbtc3: Bitcoin testnet3",
+      "x": 559,
+      "y": 350,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#chains",
+      "bgColor": "#e9e8ff",
+      "parent": "#fxz322"
+    },
+    {
+      "@id": "#r8zm2z",
+      "name": "signet: Bitcoin signet",
+      "x": 431,
+      "y": 394,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#chains",
+      "bgColor": "#e9e8ff",
+      "parent": "#fxz322"
+    },
+    {
+      "@id": "#wzv4c3",
+      "name": "btc: Bitcoin mainnet",
+      "x": 391,
+      "y": 523,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#chains",
+      "bgColor": "#e9e8ff",
+      "parent": "#fxz322"
+    },
+    {
+      "@id": "#7fnz2s",
+      "name": "txbt4: Bitcoin BLAKE2b testnet4",
+      "x": 247,
+      "y": 478,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#chains",
+      "bgColor": "#e9e8ff",
+      "parent": "#fxz322"
+    },
+    {
+      "@id": "#p89exh",
+      "name": "xbt: Bitcoin BLAKE2b mainnet",
+      "x": 131,
+      "y": 584,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#chains",
+      "bgColor": "#e9e8ff",
+      "parent": "#fxz322"
+    },
+    {
+      "@id": "#urtpxv",
+      "name": "Related",
+      "x": -102,
+      "y": 355,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#related",
+      "bgColor": "#e5c2f2",
+      "parent": "#aurbbn"
+    },
+    {
+      "@id": "#4dg5c4",
+      "name": "gitmark",
+      "x": -31,
+      "y": 532,
+      "link": "https://github.com/solidpayorg/gitmark-test",
+      "bgColor": "#f5e4fb",
+      "parent": "#urtpxv"
+    },
+    {
+      "@id": "#kwm3he",
+      "name": "blocktrails",
+      "x": -139,
+      "y": 520,
+      "link": "https://blocktrails.org",
+      "bgColor": "#f5e4fb",
+      "parent": "#urtpxv"
+    },
+    {
+      "@id": "#qvd9cw",
+      "name": "btctx",
+      "x": -240,
+      "y": 501,
+      "link": "https://npmjs.com/package/btctx",
+      "bgColor": "#f5e4fb",
+      "parent": "#urtpxv"
+    },
+    {
+      "@id": "#sf37xb",
+      "name": "Install · 2 ›",
+      "x": -178,
+      "y": 124,
+      "link": "./kb-run.jsonld",
+      "bgColor": "#f9bdd5",
+      "parent": "#this"
+    },
+    {
+      "@id": "#fuhjpf",
+      "name": "Pipeline · 17 ›",
+      "x": -301,
+      "y": 261,
+      "link": "./kb-run.jsonld",
+      "bgColor": "#ffe2ed",
+      "parent": "#sf37xb"
+    },
+    {
+      "@id": "#dry8wx",
+      "name": "Other scripts · 6 ›",
+      "x": -361,
+      "y": 199,
+      "link": "./kb-run.jsonld",
+      "bgColor": "#ffe2ed",
+      "parent": "#sf37xb"
+    },
+    {
+      "@id": "#rmckuv",
+      "name": "SKILL.md · 10 ›",
+      "x": -227,
+      "y": 31,
+      "link": "./doc-skill.jsonld",
+      "bgColor": "#fcc2a9",
+      "parent": "#this"
+    },
+    {
+      "@id": "#6cicry",
+      "name": "Source · lib/ · 7 files ›",
+      "x": -215,
+      "y": -69,
+      "link": "./src.jsonld",
+      "bgColor": "#e0d199",
+      "parent": "#this"
+    },
+    {
+      "@id": "#7c28q6",
+      "name": "README · 7 ›",
+      "x": -130,
+      "y": -162,
+      "link": "./readme.jsonld",
+      "bgColor": "#b1dfb5",
+      "parent": "#this"
+    },
+    {
+      "@id": "#4qbh3e",
+      "name": "API",
+      "x": -314,
+      "y": -250,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#api",
+      "bgColor": "#ddf2de",
+      "parent": "#7c28q6"
+    },
+    {
+      "@id": "#m3xps2",
+      "name": "Voucher Format",
+      "x": -342,
+      "y": -333,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#voucher-format",
+      "bgColor": "#ddf2de",
+      "parent": "#7c28q6"
+    },
+    {
+      "@id": "#yxjf84",
+      "name": "Files Created",
+      "x": -199,
+      "y": -316,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#files-created",
+      "bgColor": "#ddf2de",
+      "parent": "#7c28q6"
+    },
+    {
+      "@id": "#mrv4db",
+      "name": "Chains",
+      "x": -185,
+      "y": -422,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#chains",
+      "bgColor": "#ddf2de",
+      "parent": "#7c28q6"
+    },
+    {
+      "@id": "#i6483q",
+      "name": "Open issues · 2",
+      "x": 31,
+      "y": -194,
+      "link": "https://github.com/blocktrails/fund-agent/issues",
+      "bgColor": "#95e1e3",
+      "parent": "#this"
+    },
+    {
+      "@id": "#kmcrgd",
+      "name": "#4 Add the --publish switch: default t…",
+      "x": -11,
+      "y": -378,
+      "link": "https://github.com/blocktrails/fund-agent/issues/4",
+      "bgColor": "#d1f3f4",
+      "parent": "#i6483q"
+    },
+    {
+      "@id": "#ktiw89",
+      "name": "#1 Write nostr.voucher (bootstrap hand…",
+      "x": 127,
+      "y": -334,
+      "link": "https://github.com/blocktrails/fund-agent/issues/1",
+      "bgColor": "#d1f3f4",
+      "parent": "#i6483q"
     }
   ],
   "connections": [
@@ -152,28 +306,96 @@
       "end": 6
     },
     {
-      "start": 0,
+      "start": 6,
       "end": 7
     },
     {
-      "start": 0,
+      "start": 6,
       "end": 8
     },
     {
-      "start": 8,
+      "start": 6,
       "end": 9
     },
     {
-      "start": 8,
+      "start": 6,
       "end": 10
     },
     {
-      "start": 0,
+      "start": 6,
       "end": 11
     },
     {
-      "start": 11,
+      "start": 6,
       "end": 12
+    },
+    {
+      "start": 5,
+      "end": 13
+    },
+    {
+      "start": 13,
+      "end": 14
+    },
+    {
+      "start": 13,
+      "end": 15
+    },
+    {
+      "start": 13,
+      "end": 16
+    },
+    {
+      "start": 0,
+      "end": 17
+    },
+    {
+      "start": 17,
+      "end": 18
+    },
+    {
+      "start": 17,
+      "end": 19
+    },
+    {
+      "start": 0,
+      "end": 20
+    },
+    {
+      "start": 0,
+      "end": 21
+    },
+    {
+      "start": 0,
+      "end": 22
+    },
+    {
+      "start": 22,
+      "end": 23
+    },
+    {
+      "start": 22,
+      "end": 24
+    },
+    {
+      "start": 22,
+      "end": 25
+    },
+    {
+      "start": 22,
+      "end": 26
+    },
+    {
+      "start": 0,
+      "end": 27
+    },
+    {
+      "start": 27,
+      "end": 28
+    },
+    {
+      "start": 27,
+      "end": 29
     }
   ],
   "selectedNode": 0

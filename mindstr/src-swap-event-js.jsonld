@@ -19,134 +19,143 @@
       "bgColor": "#ebc573"
     },
     {
-      "@id": "#e9sufn",
-      "name": "exports 1/2",
-      "x": 249,
-      "y": 19,
+      "@id": "#vz8rhu",
+      "name": "The swap request event",
+      "x": 192,
+      "y": -108,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/swap-event.js#L1",
       "bgColor": "#acd5ff",
       "parent": "#this"
     },
     {
-      "@id": "#g45zx9",
-      "name": "KIND_SWAP()",
-      "x": 380,
-      "y": -276,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/swap-event.js#L14",
-      "bgColor": "#daeeff",
-      "parent": "#e9sufn"
-    },
-    {
-      "@id": "#vz8rhu",
-      "name": "DEFAULT_RELAYS()",
-      "x": 546,
-      "y": -190,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/swap-event.js#L15",
-      "bgColor": "#daeeff",
-      "parent": "#e9sufn"
-    },
-    {
       "@id": "#35gtrs",
-      "name": "parseRelays()",
-      "x": 499,
-      "y": -30,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/swap-event.js#L20",
-      "bgColor": "#daeeff",
-      "parent": "#e9sufn"
-    },
-    {
-      "@id": "#fiqrfa",
-      "name": "buildSwapRequest()",
-      "x": 572,
-      "y": 123,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/swap-event.js#L33",
-      "bgColor": "#daeeff",
-      "parent": "#e9sufn"
-    },
-    {
-      "@id": "#fad69b",
-      "name": "buildSwapReply()",
-      "x": 422,
-      "y": 228,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/swap-event.js#L40",
-      "bgColor": "#daeeff",
-      "parent": "#e9sufn"
-    },
-    {
-      "@id": "#fnrzmm",
-      "name": "verifyEvent()",
-      "x": 374,
-      "y": 388,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/swap-event.js#L48",
-      "bgColor": "#daeeff",
-      "parent": "#e9sufn"
-    },
-    {
-      "@id": "#3y3s3p",
-      "name": "exports 2/2",
-      "x": -137,
-      "y": 178,
-      "bgColor": "#f3bee1",
+      "name": "exports 1/2",
+      "x": 153,
+      "y": 146,
+      "bgColor": "#e9c1ef",
       "parent": "#this"
     },
     {
+      "@id": "#fiqrfa",
+      "name": "KIND_SWAP",
+      "x": 424,
+      "y": 61,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/swap-event.js#L14",
+      "bgColor": "#f7e4f9",
+      "parent": "#35gtrs"
+    },
+    {
+      "@id": "#fad69b",
+      "name": "DEFAULT_RELAYS",
+      "x": 453,
+      "y": 180,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/swap-event.js#L15",
+      "bgColor": "#f7e4f9",
+      "parent": "#35gtrs"
+    },
+    {
+      "@id": "#fnrzmm",
+      "name": "parseRelays()",
+      "x": 327,
+      "y": 237,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/swap-event.js#L20",
+      "bgColor": "#f7e4f9",
+      "parent": "#35gtrs"
+    },
+    {
+      "@id": "#3y3s3p",
+      "name": "buildSwapRequest()",
+      "x": 296,
+      "y": 352,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/swap-event.js#L33",
+      "bgColor": "#f7e4f9",
+      "parent": "#35gtrs"
+    },
+    {
       "@id": "#ujs2ci",
-      "name": "readSwapRequest()",
-      "x": 21,
-      "y": 425,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/swap-event.js#L60",
-      "bgColor": "#fce3f3",
-      "parent": "#3y3s3p"
+      "name": "buildSwapReply()",
+      "x": 128,
+      "y": 346,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/swap-event.js#L40",
+      "bgColor": "#f7e4f9",
+      "parent": "#35gtrs"
     },
     {
       "@id": "#442pm7",
-      "name": "NO_WEBSOCKET()",
-      "x": -156,
-      "y": 484,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/swap-event.js#L71",
-      "bgColor": "#fce3f3",
-      "parent": "#3y3s3p"
+      "name": "verifyEvent()",
+      "x": 28,
+      "y": 424,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/swap-event.js#L48",
+      "bgColor": "#f7e4f9",
+      "parent": "#35gtrs"
     },
     {
       "@id": "#imr4n9",
-      "name": "hasWebSocket()",
-      "x": -273,
-      "y": 356,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/swap-event.js#L72",
-      "bgColor": "#fce3f3",
-      "parent": "#3y3s3p"
+      "name": "exports 2/2",
+      "x": -196,
+      "y": 102,
+      "bgColor": "#fec0b1",
+      "parent": "#this"
     },
     {
       "@id": "#tpktj6",
-      "name": "publish()",
-      "x": -458,
-      "y": 316,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/swap-event.js#L75",
-      "bgColor": "#fce3f3",
-      "parent": "#3y3s3p"
+      "name": "readSwapRequest()",
+      "x": -197,
+      "y": 322,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/swap-event.js#L60",
+      "bgColor": "#ffe3dc",
+      "parent": "#imr4n9"
     },
     {
       "@id": "#u94rpy",
-      "name": "subscribe()",
-      "x": -466,
-      "y": 155,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/swap-event.js#L99",
-      "bgColor": "#fce3f3",
-      "parent": "#3y3s3p"
+      "name": "NO_WEBSOCKET",
+      "x": -346,
+      "y": 309,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/swap-event.js#L71",
+      "bgColor": "#ffe3dc",
+      "parent": "#imr4n9"
     },
     {
       "@id": "#7txfyn",
+      "name": "hasWebSocket()",
+      "x": -367,
+      "y": 190,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/swap-event.js#L72",
+      "bgColor": "#ffe3dc",
+      "parent": "#imr4n9"
+    },
+    {
+      "@id": "#v5njcx",
+      "name": "publish()",
+      "x": -480,
+      "y": 119,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/swap-event.js#L75",
+      "bgColor": "#ffe3dc",
+      "parent": "#imr4n9"
+    },
+    {
+      "@id": "#z8kicz",
+      "name": "subscribe()",
+      "x": -430,
+      "y": 6,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/swap-event.js#L99",
+      "bgColor": "#ffe3dc",
+      "parent": "#imr4n9"
+    },
+    {
+      "@id": "#7348h9",
       "name": "131 lines",
-      "x": -223,
-      "y": -96,
+      "x": -175,
+      "y": -127,
       "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/swap-event.js",
       "bgColor": "#ececec",
       "parent": "#this"
     },
     {
-      "@id": "#v5njcx",
+      "@id": "#jtny2v",
       "name": "← lib/",
-      "x": -4,
-      "y": -212,
+      "x": 14,
+      "y": -195,
       "link": "./src.jsonld",
       "bgColor": "#ececec",
       "parent": "#this"
@@ -158,60 +167,64 @@
       "end": 1
     },
     {
-      "start": 1,
+      "start": 0,
       "end": 2
     },
     {
-      "start": 1,
+      "start": 2,
       "end": 3
     },
     {
-      "start": 1,
+      "start": 2,
       "end": 4
     },
     {
-      "start": 1,
+      "start": 2,
       "end": 5
     },
     {
-      "start": 1,
+      "start": 2,
       "end": 6
     },
     {
-      "start": 1,
+      "start": 2,
       "end": 7
     },
     {
-      "start": 0,
+      "start": 2,
       "end": 8
     },
     {
-      "start": 8,
+      "start": 0,
       "end": 9
     },
     {
-      "start": 8,
+      "start": 9,
       "end": 10
     },
     {
-      "start": 8,
+      "start": 9,
       "end": 11
     },
     {
-      "start": 8,
+      "start": 9,
       "end": 12
     },
     {
-      "start": 8,
+      "start": 9,
       "end": 13
     },
     {
-      "start": 0,
+      "start": 9,
       "end": 14
     },
     {
       "start": 0,
       "end": 15
+    },
+    {
+      "start": 0,
+      "end": 16
     }
   ],
   "selectedNode": 0

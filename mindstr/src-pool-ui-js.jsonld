@@ -20,53 +20,62 @@
     },
     {
       "@id": "#ab9ysn",
-      "name": "exports",
-      "x": 250,
-      "y": 0,
+      "name": "The pool's own page",
+      "x": 222,
+      "y": -51,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/pool-ui.js#L1",
       "bgColor": "#acd5ff",
       "parent": "#this"
     },
     {
       "@id": "#qhtzie",
-      "name": "poolSnapshot()",
-      "x": 416,
-      "y": -235,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/pool-ui.js#L9",
-      "bgColor": "#daeeff",
-      "parent": "#ab9ysn"
+      "name": "exports",
+      "x": 60,
+      "y": 189,
+      "bgColor": "#f3bee1",
+      "parent": "#this"
     },
     {
       "@id": "#2sgmjt",
-      "name": "renderPage()",
-      "x": 590,
-      "y": 0,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/pool-ui.js#L28",
-      "bgColor": "#daeeff",
-      "parent": "#ab9ysn"
+      "name": "poolSnapshot()",
+      "x": 278,
+      "y": 279,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/pool-ui.js#L9",
+      "bgColor": "#fce3f3",
+      "parent": "#qhtzie"
     },
     {
       "@id": "#j9h6ge",
-      "name": "serveUi()",
-      "x": 416,
-      "y": 235,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/pool-ui.js#L117",
-      "bgColor": "#daeeff",
-      "parent": "#ab9ysn"
+      "name": "renderPage()",
+      "x": 111,
+      "y": 353,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/pool-ui.js#L28",
+      "bgColor": "#fce3f3",
+      "parent": "#qhtzie"
     },
     {
       "@id": "#ejt2c7",
+      "name": "serveUi()",
+      "x": -76,
+      "y": 360,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/pool-ui.js#L117",
+      "bgColor": "#fce3f3",
+      "parent": "#qhtzie"
+    },
+    {
+      "@id": "#tvx8v7",
       "name": "128 lines",
-      "x": -125,
-      "y": 184,
+      "x": -222,
+      "y": 51,
       "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/pool-ui.js",
       "bgColor": "#ececec",
       "parent": "#this"
     },
     {
-      "@id": "#tvx8v7",
+      "@id": "#4bfmpa",
       "name": "← lib/",
-      "x": -125,
-      "y": -184,
+      "x": -60,
+      "y": -189,
       "link": "./src.jsonld",
       "bgColor": "#ececec",
       "parent": "#this"
@@ -78,24 +87,28 @@
       "end": 1
     },
     {
-      "start": 1,
+      "start": 0,
       "end": 2
     },
     {
-      "start": 1,
+      "start": 2,
       "end": 3
     },
     {
-      "start": 1,
+      "start": 2,
       "end": 4
     },
     {
-      "start": 0,
+      "start": 2,
       "end": 5
     },
     {
       "start": 0,
       "end": 6
+    },
+    {
+      "start": 0,
+      "end": 7
     }
   ],
   "selectedNode": 0

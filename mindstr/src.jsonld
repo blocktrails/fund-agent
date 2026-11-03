@@ -19,100 +19,100 @@
       "bgColor": "#ebc573"
     },
     {
-      "@id": "#h59t8f",
+      "@id": "#u2s2vv",
       "name": "address.js",
-      "x": 198,
-      "y": -129,
+      "x": 182,
+      "y": -119,
       "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/address.js",
       "bgColor": "#acd5ff",
       "parent": "#this"
     },
     {
-      "@id": "#rfby2g",
+      "@id": "#vx2z65",
       "name": "taprootAddress()",
-      "x": 337,
-      "y": -314,
+      "x": 290,
+      "y": -270,
       "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/address.js#L49",
       "bgColor": "#daeeff",
-      "parent": "#h59t8f"
+      "parent": "#u2s2vv"
     },
     {
-      "@id": "#arxjt8",
+      "@id": "#xwei9g",
       "name": "decodeTaprootAddress()",
-      "x": 518,
-      "y": -241,
+      "x": 377,
+      "y": -175,
       "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/address.js#L58",
       "bgColor": "#daeeff",
-      "parent": "#h59t8f"
+      "parent": "#u2s2vv"
     },
     {
-      "@id": "#jtyjdw",
+      "@id": "#6bzs4i",
       "name": "pool-ui.js · 3 ›",
-      "x": 248,
-      "y": 28,
+      "x": 228,
+      "y": 26,
       "link": "./src-pool-ui-js.jsonld",
       "bgColor": "#d9c6fb",
       "parent": "#this"
     },
     {
-      "@id": "#dtqx4z",
+      "@id": "#fkywkd",
       "name": "pool.js · 8 ›",
-      "x": 152,
-      "y": 169,
+      "x": 140,
+      "y": 155,
       "link": "./src-pool-js.jsonld",
       "bgColor": "#f9bdd5",
       "parent": "#this"
     },
     {
-      "@id": "#u2s2vv",
+      "@id": "#j8deiz",
       "name": "swap-event.js · 11 ›",
-      "x": -33,
-      "y": 211,
+      "x": -30,
+      "y": 194,
       "link": "./src-swap-event-js.jsonld",
       "bgColor": "#fcc2a9",
       "parent": "#this"
     },
     {
-      "@id": "#vx2z65",
+      "@id": "#aya9s9",
       "name": "tx-bip341.js",
-      "x": -198,
-      "y": 129,
+      "x": -182,
+      "y": 119,
       "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/tx-bip341.js",
       "bgColor": "#e0d199",
       "parent": "#this"
     },
     {
-      "@id": "#xwei9g",
+      "@id": "#vn2imx",
       "name": "buildTaprootTx()",
-      "x": -397,
-      "y": 259,
+      "x": -341,
+      "y": 223,
       "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/tx-bip341.js#L13",
       "bgColor": "#f2ecd2",
-      "parent": "#vx2z65"
+      "parent": "#aya9s9"
     },
     {
-      "@id": "#6bzs4i",
+      "@id": "#2tznvh",
       "name": "tx.js · 3 ›",
-      "x": -248,
-      "y": -28,
+      "x": -228,
+      "y": -26,
       "link": "./src-tx-js.jsonld",
       "bgColor": "#b1dfb5",
       "parent": "#this"
     },
     {
-      "@id": "#fkywkd",
+      "@id": "#cnh2fk",
       "name": "unified.js · 17 ›",
-      "x": -152,
-      "y": -169,
+      "x": -140,
+      "y": -155,
       "link": "./src-unified-js.jsonld",
       "bgColor": "#95e1e3",
       "parent": "#this"
     },
     {
-      "@id": "#j8deiz",
+      "@id": "#dk76uz",
       "name": "← fund-agent",
-      "x": 33,
-      "y": -211,
+      "x": 30,
+      "y": -194,
       "link": "./index.jsonld",
       "bgColor": "#ececec",
       "parent": "#this"

@@ -19,116 +19,116 @@
       "bgColor": "#ebc573"
     },
     {
-      "@id": "#imr4n9",
+      "@id": "#vx2z65",
       "name": "sections 1/2",
-      "x": 227,
-      "y": 88,
+      "x": 208,
+      "y": 81,
       "bgColor": "#acd5ff",
       "parent": "#this"
     },
     {
-      "@id": "#tpktj6",
+      "@id": "#xwei9g",
       "name": "When to Use",
-      "x": 408,
-      "y": -246,
+      "x": 351,
+      "y": -212,
       "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/SKILL.md#when-to-use",
       "bgColor": "#daeeff",
-      "parent": "#imr4n9"
+      "parent": "#vx2z65"
     },
     {
-      "@id": "#u94rpy",
+      "@id": "#6bzs4i",
       "name": "The one line",
-      "x": 574,
-      "y": -115,
+      "x": 487,
+      "y": -97,
       "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/SKILL.md#the-one-line",
       "bgColor": "#daeeff",
-      "parent": "#imr4n9"
+      "parent": "#vx2z65"
     },
     {
-      "@id": "#7txfyn",
+      "@id": "#fkywkd",
       "name": "Setting up the voucher file, once",
-      "x": 482,
-      "y": 114,
+      "x": 417,
+      "y": 98,
       "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/SKILL.md#setting-up-the-voucher-file-once",
       "bgColor": "#daeeff",
-      "parent": "#imr4n9"
+      "parent": "#vx2z65"
     },
     {
-      "@id": "#v5njcx",
+      "@id": "#j8deiz",
       "name": "Retiring an agent: the coin comes back",
-      "x": 352,
-      "y": 402,
+      "x": 299,
+      "y": 341,
       "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/SKILL.md#retiring-an-agent-the-coin-comes-back",
       "bgColor": "#daeeff",
-      "parent": "#imr4n9"
+      "parent": "#vx2z65"
     },
     {
-      "@id": "#z8kicz",
+      "@id": "#aya9s9",
       "name": "Arguments",
-      "x": 48,
-      "y": 423,
+      "x": 42,
+      "y": 364,
       "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/SKILL.md#arguments",
       "bgColor": "#daeeff",
-      "parent": "#imr4n9"
+      "parent": "#vx2z65"
     },
     {
-      "@id": "#7348h9",
+      "@id": "#vn2imx",
       "name": "sections 2/2",
-      "x": -245,
-      "y": 42,
+      "x": -226,
+      "y": 38,
       "bgColor": "#febdc6",
       "parent": "#this"
     },
     {
-      "@id": "#jtny2v",
+      "@id": "#2tznvh",
       "name": "Voucher forms",
-      "x": -312,
-      "y": 332,
+      "x": -268,
+      "y": 286,
       "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/SKILL.md#voucher-forms",
       "bgColor": "#ffe2e6",
-      "parent": "#7348h9"
+      "parent": "#vn2imx"
     },
     {
-      "@id": "#zvvi4r",
+      "@id": "#cnh2fk",
       "name": "Output",
-      "x": -504,
-      "y": 261,
+      "x": -427,
+      "y": 221,
       "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/SKILL.md#output",
       "bgColor": "#ffe2e6",
-      "parent": "#7348h9"
+      "parent": "#vn2imx"
     },
     {
-      "@id": "#ezqtt6",
+      "@id": "#dk76uz",
       "name": "Library",
-      "x": -490,
-      "y": 83,
+      "x": -422,
+      "y": 71,
       "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/SKILL.md#library",
       "bgColor": "#ffe2e6",
-      "parent": "#7348h9"
+      "parent": "#vn2imx"
     },
     {
-      "@id": "#8edjsn",
+      "@id": "#5aggpq",
       "name": "Security Notes",
-      "x": -583,
-      "y": -77,
+      "x": -494,
+      "y": -65,
       "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/SKILL.md#security-notes",
       "bgColor": "#ffe2e6",
-      "parent": "#7348h9"
+      "parent": "#vn2imx"
     },
     {
-      "@id": "#75s7ir",
+      "@id": "#eqmaaw",
       "name": "References",
-      "x": -438,
-      "y": -205,
+      "x": -377,
+      "y": -176,
       "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/SKILL.md#references",
       "bgColor": "#ffe2e6",
-      "parent": "#7348h9"
+      "parent": "#vn2imx"
     },
     {
-      "@id": "#7x3k79",
+      "@id": "#pjbq25",
       "name": "← fund-agent",
-      "x": -25,
-      "y": -211,
+      "x": -23,
+      "y": -194,
       "link": "./index.jsonld",
       "bgColor": "#ececec",
       "parent": "#this"

@@ -12,257 +12,44 @@
   "nodes": [
     {
       "@id": "#this",
-      "name": "fund-agent",
+      "name": "fund-agent · 7",
       "x": 0,
       "y": 0,
       "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#fund-agent",
       "bgColor": "#ebc573"
     },
     {
-      "@id": "#ab9ysn",
-      "name": "Install",
-      "x": 181,
-      "y": -147,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#install",
+      "@id": "#7348h9",
+      "name": "Install → API ›",
+      "x": 222,
+      "y": -51,
+      "link": "./readme-1.jsonld",
       "bgColor": "#acd5ff",
       "parent": "#this"
     },
     {
-      "@id": "#qhtzie",
-      "name": "Usage",
-      "x": 250,
-      "y": -11,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#usage",
+      "@id": "#jtny2v",
+      "name": "trailTxo, parseTxo, lookupOutput → Chains ›",
+      "x": 60,
+      "y": 189,
+      "link": "./readme-2.jsonld",
       "bgColor": "#f3bee1",
       "parent": "#this"
     },
     {
-      "@id": "#2sgmjt",
-      "name": "Setting up, once",
-      "x": 474,
-      "y": -135,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#setting-up-once",
-      "bgColor": "#fce3f3",
-      "parent": "#qhtzie"
-    },
-    {
-      "@id": "#j9h6ge",
-      "name": "Swapping between chains",
-      "x": 584,
-      "y": -69,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#swapping-between-chains",
-      "bgColor": "#fce3f3",
-      "parent": "#qhtzie"
-    },
-    {
-      "@id": "#ejt2c7",
-      "name": "CLI",
-      "x": 499,
-      "y": 21,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#cli",
-      "bgColor": "#fce3f3",
-      "parent": "#qhtzie"
-    },
-    {
-      "@id": "#tvx8v7",
-      "name": "Programmatic",
-      "x": 576,
-      "y": 110,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#programmatic",
-      "bgColor": "#fce3f3",
-      "parent": "#qhtzie"
-    },
-    {
-      "@id": "#4bfmpa",
-      "name": "API",
-      "x": -203,
-      "y": 124,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#api",
+      "@id": "#zvvi4r",
+      "name": "Related → Related ›",
+      "x": -222,
+      "y": 51,
+      "link": "./readme-3.jsonld",
       "bgColor": "#f1c99c",
       "parent": "#this"
     },
     {
-      "@id": "#c2mpq8",
-      "name": "parts 1/3",
-      "x": 182,
-      "y": 396,
-      "bgColor": "#fbe8d3",
-      "parent": "#4bfmpa"
-    },
-    {
-      "@id": "#yykmee",
-      "name": "fundAgent",
-      "x": 489,
-      "y": 484,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#fundagentoptions",
-      "bgColor": "#fbe8d3",
-      "parent": "#c2mpq8"
-    },
-    {
-      "@id": "#7kgwkb",
-      "name": "generateKeypair",
-      "x": 461,
-      "y": 599,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#generatekeypair",
-      "bgColor": "#fbe8d3",
-      "parent": "#c2mpq8"
-    },
-    {
-      "@id": "#x7t4w7",
-      "name": "parseVoucher",
-      "x": 318,
-      "y": 577,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#parsevoucheruri",
-      "bgColor": "#fbe8d3",
-      "parent": "#c2mpq8"
-    },
-    {
-      "@id": "#dsw684",
-      "name": "createVoucher",
-      "x": 253,
-      "y": 681,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#createvoucheroptions",
-      "bgColor": "#fbe8d3",
-      "parent": "#c2mpq8"
-    },
-    {
-      "@id": "#v88t4a",
-      "name": "gitConfig",
-      "x": 128,
-      "y": 628,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#gitconfigkey-value-global",
-      "bgColor": "#fbe8d3",
-      "parent": "#c2mpq8"
-    },
-    {
-      "@id": "#skzt29",
-      "name": "planFunding",
-      "x": 31,
-      "y": 713,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#planfundingvoucher",
-      "bgColor": "#fbe8d3",
-      "parent": "#c2mpq8"
-    },
-    {
-      "@id": "#t4pwzt",
-      "name": "parts 2/3",
-      "x": -359,
-      "y": 398,
-      "bgColor": "#fbe8d3",
-      "parent": "#4bfmpa"
-    },
-    {
-      "@id": "#jhaa84",
-      "name": "explorerUrl",
-      "x": -196,
-      "y": 615,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#explorerurlchain-txid",
-      "bgColor": "#fbe8d3",
-      "parent": "#t4pwzt"
-    },
-    {
-      "@id": "#wavvy9",
-      "name": "createFaucet",
-      "x": -331,
-      "y": 656,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#createfaucet-chain-privatekey",
-      "bgColor": "#fbe8d3",
-      "parent": "#t4pwzt"
-    },
-    {
-      "@id": "#i9w3v4",
-      "name": "parseFaucet",
-      "x": -389,
-      "y": 545,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#parsefauceturi",
-      "bgColor": "#fbe8d3",
-      "parent": "#t4pwzt"
-    },
-    {
-      "@id": "#e9sufn",
-      "name": "refreshVoucher",
-      "x": -532,
-      "y": 553,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#refreshvoucher-uri-file-fetch",
-      "bgColor": "#fbe8d3",
-      "parent": "#t4pwzt"
-    },
-    {
-      "@id": "#g45zx9",
-      "name": "balanceOf",
-      "x": -551,
-      "y": 432,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#balanceofchain-pubkey-fetch",
-      "bgColor": "#fbe8d3",
-      "parent": "#t4pwzt"
-    },
-    {
-      "@id": "#vz8rhu",
-      "name": "trailTxo, parseTxo, lookupOutput",
-      "x": -709,
-      "y": 383,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#trailtxo-parsetxouri-lookupoutputchain-txid-vout-fetch",
-      "bgColor": "#fbe8d3",
-      "parent": "#t4pwzt"
-    },
-    {
-      "@id": "#35gtrs",
-      "name": "parts 3/3",
-      "x": -459,
-      "y": -168,
-      "bgColor": "#fbe8d3",
-      "parent": "#4bfmpa"
-    },
-    {
-      "@id": "#fiqrfa",
-      "name": "bootstrap, bootstrapFaucet, planBootstrap,…",
-      "x": -747,
-      "y": 55,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#bootstrap-chain-voucherfile-dryrun-fetch-random-privatekey-bootstrapfaucetchain-planbootstraputxos-bootstrapkey-bootstrapcoin",
-      "bgColor": "#fbe8d3",
-      "parent": "#35gtrs"
-    },
-    {
-      "@id": "#fad69b",
-      "name": "latestVersion, isNewer, canAdoptForBootstrap",
-      "x": -817,
-      "y": -166,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#latestversion-fetch-timeoutms-isnewercurrent-latest-canadoptforbootstrapvoucher-utxos",
-      "bgColor": "#fbe8d3",
-      "parent": "#35gtrs"
-    },
-    {
-      "@id": "#fnrzmm",
-      "name": "consolidate, planConsolidation,…",
-      "x": -651,
-      "y": -316,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#consolidate-voucher-voucherfile-dryrun-fetch-planconsolidationchain-utxos-buildconsolidationtx-voucher-utxos",
-      "bgColor": "#fbe8d3",
-      "parent": "#35gtrs"
-    },
-    {
-      "@id": "#3y3s3p",
-      "name": "addressOf, lookupUtxos, agentsFrom",
-      "x": -608,
-      "y": -497,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#addressofchain-pubkey-lookuputxoschain-address-agentsfromsats",
-      "bgColor": "#fbe8d3",
-      "parent": "#35gtrs"
-    },
-    {
-      "@id": "#ujs2ci",
-      "name": "CHAINS",
-      "x": -416,
-      "y": -529,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/README.md#chains",
-      "bgColor": "#fbe8d3",
-      "parent": "#35gtrs"
-    },
-    {
-      "@id": "#442pm7",
+      "@id": "#ezqtt6",
       "name": "← fund-agent",
-      "x": 59,
-      "y": -206,
+      "x": -60,
+      "y": -189,
       "link": "./index.jsonld",
       "bgColor": "#ececec",
       "parent": "#this"
@@ -278,108 +65,12 @@
       "end": 2
     },
     {
-      "start": 2,
+      "start": 0,
       "end": 3
     },
     {
-      "start": 2,
+      "start": 0,
       "end": 4
-    },
-    {
-      "start": 2,
-      "end": 5
-    },
-    {
-      "start": 2,
-      "end": 6
-    },
-    {
-      "start": 0,
-      "end": 7
-    },
-    {
-      "start": 7,
-      "end": 8
-    },
-    {
-      "start": 8,
-      "end": 9
-    },
-    {
-      "start": 8,
-      "end": 10
-    },
-    {
-      "start": 8,
-      "end": 11
-    },
-    {
-      "start": 8,
-      "end": 12
-    },
-    {
-      "start": 8,
-      "end": 13
-    },
-    {
-      "start": 8,
-      "end": 14
-    },
-    {
-      "start": 7,
-      "end": 15
-    },
-    {
-      "start": 15,
-      "end": 16
-    },
-    {
-      "start": 15,
-      "end": 17
-    },
-    {
-      "start": 15,
-      "end": 18
-    },
-    {
-      "start": 15,
-      "end": 19
-    },
-    {
-      "start": 15,
-      "end": 20
-    },
-    {
-      "start": 15,
-      "end": 21
-    },
-    {
-      "start": 7,
-      "end": 22
-    },
-    {
-      "start": 22,
-      "end": 23
-    },
-    {
-      "start": 22,
-      "end": 24
-    },
-    {
-      "start": 22,
-      "end": 25
-    },
-    {
-      "start": 22,
-      "end": 26
-    },
-    {
-      "start": 22,
-      "end": 27
-    },
-    {
-      "start": 0,
-      "end": 28
     }
   ],
   "selectedNode": 0

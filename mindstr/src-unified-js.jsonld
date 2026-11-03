@@ -19,196 +19,205 @@
       "bgColor": "#ebc573"
     },
     {
-      "@id": "#75s7ir",
-      "name": "exports 1/3",
-      "x": 245,
-      "y": -44,
+      "@id": "#bq9ccn",
+      "name": "Unified opt-in signature hash (Bitcoin Knots PR…",
+      "x": 175,
+      "y": -127,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L1",
       "bgColor": "#acd5ff",
       "parent": "#this"
     },
     {
-      "@id": "#7x3k79",
-      "name": "SIGHASH_ALL()",
-      "x": 349,
-      "y": -304,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L14",
-      "bgColor": "#daeeff",
-      "parent": "#75s7ir"
-    },
-    {
-      "@id": "#4af2dc",
-      "name": "SIGHASH_NONE()",
-      "x": 497,
-      "y": -270,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L15",
-      "bgColor": "#daeeff",
-      "parent": "#75s7ir"
-    },
-    {
-      "@id": "#7iui3z",
-      "name": "SIGHASH_SINGLE()",
-      "x": 472,
-      "y": -141,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L16",
-      "bgColor": "#daeeff",
-      "parent": "#75s7ir"
-    },
-    {
-      "@id": "#bq9ccn",
-      "name": "SIGHASH_UNIFIED()",
-      "x": 586,
-      "y": -55,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L17",
-      "bgColor": "#daeeff",
-      "parent": "#75s7ir"
-    },
-    {
       "@id": "#3yirdr",
-      "name": "SIGHASH_ANYONECANPAY()",
-      "x": 495,
-      "y": 58,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L18",
-      "bgColor": "#daeeff",
-      "parent": "#75s7ir"
+      "name": "exports 1/3",
+      "x": 215,
+      "y": 70,
+      "bgColor": "#e0c4f6",
+      "parent": "#this"
     },
     {
       "@id": "#ptf2jy",
-      "name": "SCRIPT_TYPE_BASE()",
-      "x": 548,
-      "y": 187,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L20",
-      "bgColor": "#daeeff",
-      "parent": "#75s7ir"
+      "name": "SIGHASH_ALL",
+      "x": 426,
+      "y": -53,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L14",
+      "bgColor": "#f2e5fd",
+      "parent": "#3yirdr"
     },
     {
       "@id": "#4bfy6j",
-      "name": "exports 2/3",
-      "x": 10,
-      "y": 212,
-      "bgColor": "#e9c1ef",
-      "parent": "#this"
+      "name": "SIGHASH_NONE",
+      "x": 499,
+      "y": 24,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L15",
+      "bgColor": "#f2e5fd",
+      "parent": "#3yirdr"
     },
     {
       "@id": "#4wkdd9",
-      "name": "SCRIPT_TYPE_WITNESS_V0()",
-      "x": 304,
-      "y": 337,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L21",
-      "bgColor": "#f7e4f9",
-      "parent": "#4bfy6j"
+      "name": "SIGHASH_SINGLE",
+      "x": 416,
+      "y": 93,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L16",
+      "bgColor": "#f2e5fd",
+      "parent": "#3yirdr"
     },
     {
       "@id": "#yiscsp",
-      "name": "SCRIPT_TYPE_TAPROOT()",
-      "x": 221,
-      "y": 467,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L22",
-      "bgColor": "#f7e4f9",
-      "parent": "#4bfy6j"
+      "name": "SIGHASH_UNIFIED",
+      "x": 448,
+      "y": 183,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L17",
+      "bgColor": "#f2e5fd",
+      "parent": "#3yirdr"
     },
     {
       "@id": "#2fzfhg",
-      "name": "SCRIPT_TYPE_TAPSCRIPT()",
-      "x": 60,
-      "y": 421,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L23",
-      "bgColor": "#f7e4f9",
-      "parent": "#4bfy6j"
+      "name": "SIGHASH_ANYONECANPAY",
+      "x": 338,
+      "y": 229,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L18",
+      "bgColor": "#f2e5fd",
+      "parent": "#3yirdr"
     },
     {
       "@id": "#6ab87r",
-      "name": "compactSize()",
-      "x": -79,
-      "y": 497,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L29",
-      "bgColor": "#f7e4f9",
-      "parent": "#4bfy6j"
+      "name": "SCRIPT_TYPE_BASE",
+      "x": 321,
+      "y": 326,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L20",
+      "bgColor": "#f2e5fd",
+      "parent": "#3yirdr"
     },
     {
       "@id": "#uyfscv",
-      "name": "u32le()",
-      "x": -179,
-      "y": 397,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L36",
-      "bgColor": "#f7e4f9",
-      "parent": "#4bfy6j"
-    },
-    {
-      "@id": "#z5cumb",
-      "name": "i64le()",
-      "x": -332,
-      "y": 414,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L40",
-      "bgColor": "#f7e4f9",
-      "parent": "#4bfy6j"
-    },
-    {
-      "@id": "#7iejm3",
-      "name": "exports 3/3",
-      "x": -250,
-      "y": 12,
-      "bgColor": "#fec0b1",
+      "name": "exports 2/3",
+      "x": -70,
+      "y": 186,
+      "bgColor": "#febdc6",
       "parent": "#this"
     },
     {
+      "@id": "#z5cumb",
+      "name": "SCRIPT_TYPE_WITNESS_V0",
+      "x": 106,
+      "y": 356,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L21",
+      "bgColor": "#ffe2e6",
+      "parent": "#uyfscv"
+    },
+    {
+      "@id": "#7iejm3",
+      "name": "SCRIPT_TYPE_TAPROOT",
+      "x": 3,
+      "y": 425,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L22",
+      "bgColor": "#ffe2e6",
+      "parent": "#uyfscv"
+    },
+    {
       "@id": "#452y5w",
-      "name": "concat()",
-      "x": -439,
-      "y": 203,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L47",
-      "bgColor": "#ffe3dc",
-      "parent": "#7iejm3"
+      "name": "SCRIPT_TYPE_TAPSCRIPT",
+      "x": -97,
+      "y": 345,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L23",
+      "bgColor": "#ffe2e6",
+      "parent": "#uyfscv"
     },
     {
       "@id": "#yyjnxk",
-      "name": "taggedHash()",
-      "x": -567,
-      "y": 138,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L55",
-      "bgColor": "#ffe3dc",
-      "parent": "#7iejm3"
+      "name": "compactSize()",
+      "x": -213,
+      "y": 391,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L29",
+      "bgColor": "#ffe2e6",
+      "parent": "#uyfscv"
     },
     {
       "@id": "#hrvxpy",
-      "name": "parseTransaction()",
-      "x": -499,
-      "y": 25,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L74",
-      "bgColor": "#ffe3dc",
-      "parent": "#7iejm3"
+      "name": "u32le()",
+      "x": -261,
+      "y": 290,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L36",
+      "bgColor": "#ffe2e6",
+      "parent": "#uyfscv"
     },
     {
       "@id": "#hzsqn4",
-      "name": "tapleafHash()",
-      "x": -582,
-      "y": -81,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L121",
-      "bgColor": "#ffe3dc",
-      "parent": "#7iejm3"
+      "name": "i64le()",
+      "x": -380,
+      "y": 276,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L40",
+      "bgColor": "#ffe2e6",
+      "parent": "#uyfscv"
     },
     {
       "@id": "#dttxwc",
-      "name": "unifiedSighash()",
-      "x": -464,
-      "y": -158,
-      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L131",
-      "bgColor": "#ffe3dc",
-      "parent": "#7iejm3"
+      "name": "exports 3/3",
+      "x": -228,
+      "y": -24,
+      "bgColor": "#f1c99c",
+      "parent": "#this"
     },
     {
       "@id": "#p8ysyk",
+      "name": "concat()",
+      "x": -414,
+      "y": 100,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L47",
+      "bgColor": "#fbe8d3",
+      "parent": "#dttxwc"
+    },
+    {
+      "@id": "#9c2qhr",
+      "name": "taggedHash()",
+      "x": -499,
+      "y": 32,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L55",
+      "bgColor": "#fbe8d3",
+      "parent": "#dttxwc"
+    },
+    {
+      "@id": "#h59t8f",
+      "name": "parseTransaction()",
+      "x": -427,
+      "y": -45,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L74",
+      "bgColor": "#fbe8d3",
+      "parent": "#dttxwc"
+    },
+    {
+      "@id": "#rfby2g",
+      "name": "tapleafHash()",
+      "x": -474,
+      "y": -136,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L121",
+      "bgColor": "#fbe8d3",
+      "parent": "#dttxwc"
+    },
+    {
+      "@id": "#arxjt8",
+      "name": "unifiedSighash()",
+      "x": -372,
+      "y": -184,
+      "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js#L131",
+      "bgColor": "#fbe8d3",
+      "parent": "#dttxwc"
+    },
+    {
+      "@id": "#jtyjdw",
       "name": "196 lines",
-      "x": -141,
-      "y": -175,
+      "x": -111,
+      "y": -171,
       "link": "https://github.com/blocktrails/fund-agent/blob/gh-pages/lib/unified.js",
       "bgColor": "#ececec",
       "parent": "#this"
     },
     {
-      "@id": "#9c2qhr",
+      "@id": "#dtqx4z",
       "name": "← lib/",
-      "x": 37,
-      "y": -210,
+      "x": 41,
+      "y": -192,
       "link": "./src.jsonld",
       "bgColor": "#ececec",
       "parent": "#this"
@@ -220,88 +229,92 @@
       "end": 1
     },
     {
-      "start": 1,
+      "start": 0,
       "end": 2
     },
     {
-      "start": 1,
+      "start": 2,
       "end": 3
     },
     {
-      "start": 1,
+      "start": 2,
       "end": 4
     },
     {
-      "start": 1,
+      "start": 2,
       "end": 5
     },
     {
-      "start": 1,
+      "start": 2,
       "end": 6
     },
     {
-      "start": 1,
+      "start": 2,
       "end": 7
     },
     {
-      "start": 0,
+      "start": 2,
       "end": 8
     },
     {
-      "start": 8,
+      "start": 0,
       "end": 9
     },
     {
-      "start": 8,
+      "start": 9,
       "end": 10
     },
     {
-      "start": 8,
+      "start": 9,
       "end": 11
     },
     {
-      "start": 8,
+      "start": 9,
       "end": 12
     },
     {
-      "start": 8,
+      "start": 9,
       "end": 13
     },
     {
-      "start": 8,
+      "start": 9,
       "end": 14
     },
     {
-      "start": 0,
+      "start": 9,
       "end": 15
     },
     {
-      "start": 15,
+      "start": 0,
       "end": 16
     },
     {
-      "start": 15,
+      "start": 16,
       "end": 17
     },
     {
-      "start": 15,
+      "start": 16,
       "end": 18
     },
     {
-      "start": 15,
+      "start": 16,
       "end": 19
     },
     {
-      "start": 15,
+      "start": 16,
       "end": 20
     },
     {
-      "start": 0,
+      "start": 16,
       "end": 21
     },
     {
       "start": 0,
       "end": 22
+    },
+    {
+      "start": 0,
+      "end": 23
     }
   ],
   "selectedNode": 0
