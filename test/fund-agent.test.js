@@ -42,7 +42,8 @@ test('plan: caps the agent at INIT_AMOUNT, returns change, small vouchers still 
 test('every chain has a name, a broadcast endpoint and an explorer, on the right host', () => {
   for (const [id, c] of Object.entries(CHAINS)) {
     assert.ok(c.name && c.broadcast && c.explorer, id);
-    const host = c.sighash === 'unified' ? 'mempool.guide' : 'mempool.space';
+    // tbtc5 has no public explorer yet: it hangs off its own API base (FUND_AGENT_TBTC5_API)
+    const host = id === 'tbtc5' ? c.api : c.sighash === 'unified' ? 'mempool.guide' : 'mempool.space';
     assert.ok(c.broadcast.includes(host) && c.explorer.includes(host), `${id} on ${host}`);
   }
   assert.equal(explorerUrl('tbtc4', txid), `https://mempool.space/testnet4/tx/${txid}`);
