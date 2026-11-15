@@ -24,6 +24,7 @@ export const DEFAULT_FAUCET = process.env.FUND_AGENT_FAUCET || path.join(os.home
  * 'bip341' is what btctx produces; 'unified' (0x21) is the BLAKE2b chains' replay-protected
  * sighash, which this version cannot produce yet.
  */
+const TBTC5_API = (process.env.FUND_AGENT_TBTC5_API || 'http://127.0.0.1:3496').replace(/\/+$/, '');
 export const CHAINS = {
   btc:    { name: 'Bitcoin mainnet',          network: 'mainnet', sighash: 'bip341',  hrp: 'bc', api: 'https://mempool.space/api',          broadcast: 'https://mempool.space/api/tx',          explorer: 'https://mempool.space/tx/' },
   tbtc3:  { name: 'Bitcoin testnet3',         network: 'testnet', sighash: 'bip341',  hrp: 'tb', api: 'https://mempool.space/testnet/api',  broadcast: 'https://mempool.space/testnet/api/tx',  explorer: 'https://mempool.space/testnet/tx/' },
@@ -31,6 +32,8 @@ export const CHAINS = {
   signet: { name: 'Bitcoin signet',           network: 'testnet', sighash: 'bip341',  hrp: 'tb', api: 'https://mempool.space/signet/api',   broadcast: 'https://mempool.space/signet/api/tx',   explorer: 'https://mempool.space/signet/tx/' },
   txbt4:  { name: 'Bitcoin BLAKE2b testnet4', network: 'testnet', sighash: 'unified', hrp: 'tb', api: 'https://mempool.guide/testnet4/api', broadcast: 'https://mempool.guide/testnet4/api/tx', explorer: 'https://mempool.guide/testnet4/tx/' },
   xbt:    { name: 'Bitcoin BLAKE2b mainnet',  network: 'mainnet', sighash: 'unified', hrp: 'bc', api: 'https://mempool.guide/api',          broadcast: 'https://mempool.guide/api/tx',          explorer: 'https://mempool.guide/tx/' },
+  // testnet5 (BIP95) has no public esplora API yet: FUND_AGENT_TBTC5_API points at one (default: a local esplora-lite)
+  tbtc5:  { name: 'Bitcoin testnet5',         network: 'testnet', sighash: 'bip341',  hrp: 'tb', api: TBTC5_API, broadcast: TBTC5_API + '/tx', explorer: TBTC5_API + '/tx/' },
 };
 export const DEFAULT_CHAIN = 'txbt4';
 // Chains accepted in a voucher's chain segment: the keys of CHAINS.
